@@ -1,3 +1,66 @@
-from django.shortcuts import render
+from rest_framework.decorators import api_view
+from rest_framework import permissions, generics
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from .models import *
+from .serializers import *
 # Create your views here.
+
+
+class AuthMixin:
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+class GroupList(AuthMixin, generics.ListCreateAPIView):
+    serializer_class = GroupSerializer 
+    def get_queryset(self):
+        Group.objects.filter(owner = self.request.user)
+    
+    def perform_create(self, serializer):
+        Group.save(owner = self.request.user)
+
+class BucketList(AuthMixin, generics.ListCreateAPIView):
+    serializer_class = BucketSerializer 
+    def get_queryset(self):
+        Bucket.objects.filter(owner = self.request.user)
+    
+    def perform_create(self, serializer):
+        Bucket.save(owner = self.request.user)
+
+class AccountList(AuthMixin, generics.ListCreateAPIView):
+    serializer_class = AccountSerializer 
+    def get_queryset(self):
+        Account.objects.filter(owner = self.request.user)
+    
+    def perform_create(self, serializer):
+        Account.save(owner = self.request.user)
+
+class MonthlyBudgetList(AuthMixin, generics.ListCreateAPIView):
+    serializer_class = MonthlyBudgetSerializer 
+    def get_queryset(self):
+        MonthlyBudget.objects.filter(owner = self.request.user)
+    
+    def perform_create(self, serializer):
+        MonthlyBudget.save(owner = self.request.user)
+
+class PayeeList(AuthMixin, generics.ListCreateAPIView):
+    serializer_class = PayeeSerializer 
+    def get_queryset(self):
+        Payee.objects.filter(owner = self.request.user)
+    
+    def perform_create(self, serializer):
+        Payee.save(owner = self.request.user)
+
+class TransactionList(AuthMixin, generics.ListCreateAPIView):
+    serializer_class = TransactionSerializer 
+    def get_queryset(self):
+        Transaction.objects.filter(owner = self.request.user)
+    
+    def perform_create(self, serializer):
+        Transaction.save(owner = self.request.user)
+
+
+
