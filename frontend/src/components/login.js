@@ -5,7 +5,7 @@ class Login extends Component {
     super(props);
     }
 
-  render () {
+  render() {
     return (
       <div>
         <h2>Login page</h2>
