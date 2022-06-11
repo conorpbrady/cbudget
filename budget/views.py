@@ -14,7 +14,7 @@ class AuthMixin:
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-class GroupList(AuthMixin, generics.ListCreateAPIView):
+class GroupList(generics.ListCreateAPIView):
     serializer_class = GroupSerializer 
     def get_queryset(self):
         Group.objects.filter(owner = self.request.user)
@@ -22,7 +22,7 @@ class GroupList(AuthMixin, generics.ListCreateAPIView):
     def perform_create(self, serializer):
         Group.save(owner = self.request.user)
 
-class BucketList(AuthMixin, generics.ListCreateAPIView):
+class BucketList(generics.ListCreateAPIView):
     serializer_class = BucketSerializer 
     def get_queryset(self):
         Bucket.objects.filter(owner = self.request.user)
@@ -30,7 +30,7 @@ class BucketList(AuthMixin, generics.ListCreateAPIView):
     def perform_create(self, serializer):
         Bucket.save(owner = self.request.user)
 
-class AccountList(AuthMixin, generics.ListCreateAPIView):
+class AccountList(generics.ListCreateAPIView):
     serializer_class = AccountSerializer 
     def get_queryset(self):
         Account.objects.filter(owner = self.request.user)
@@ -38,7 +38,7 @@ class AccountList(AuthMixin, generics.ListCreateAPIView):
     def perform_create(self, serializer):
         Account.save(owner = self.request.user)
 
-class MonthlyBudgetList(AuthMixin, generics.ListCreateAPIView):
+class MonthlyBudgetList(generics.ListCreateAPIView):
     serializer_class = MonthlyBudgetSerializer 
     def get_queryset(self):
         MonthlyBudget.objects.filter(owner = self.request.user)
@@ -46,7 +46,7 @@ class MonthlyBudgetList(AuthMixin, generics.ListCreateAPIView):
     def perform_create(self, serializer):
         MonthlyBudget.save(owner = self.request.user)
 
-class PayeeList(AuthMixin, generics.ListCreateAPIView):
+class PayeeList(generics.ListCreateAPIView):
     serializer_class = PayeeSerializer 
     def get_queryset(self):
         Payee.objects.filter(owner = self.request.user)
@@ -54,7 +54,7 @@ class PayeeList(AuthMixin, generics.ListCreateAPIView):
     def perform_create(self, serializer):
         Payee.save(owner = self.request.user)
 
-class TransactionList(AuthMixin, generics.ListCreateAPIView):
+class TransactionList(generics.ListCreateAPIView):
     serializer_class = TransactionSerializer 
     def get_queryset(self):
         Transaction.objects.filter(owner = self.request.user)

@@ -1,5 +1,6 @@
 from django.urls import path
 from budget import views
+from rest_framework_simplejwt import views as jwt_views
 prefix = 'api/'
 urlpatterns = [
         path(prefix + 'group', views.GroupList.as_view()),
@@ -7,6 +8,10 @@ urlpatterns = [
         path(prefix + 'account', views.AccountList.as_view()),
         path(prefix + 'monthlybudget', views.AccountList.as_view()),
         path(prefix + 'payee', views.PayeeList.as_view()),
-        path(prefix + 'transaction', views.TransactionList.as_view())
+        path(prefix + 'transaction', views.TransactionList.as_view()),
+        
+        path(prefix + 'token/obtain/', jwt_views.TokenObtainPairView.as_view(), name='token_create'),
+        path(prefix + 'token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
         ]
+
 
