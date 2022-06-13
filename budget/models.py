@@ -1,13 +1,17 @@
 from django.db import models
 from datetime import date
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
+
+class BudgetUser(AbstractUser):
+    pass
 
 
 class BaseModel(models.Model):
     class Meta:
         abstract = True
-    owner = models.ForeignKey('auth.User', related_name='+', on_delete=models.CASCADE, null=True)
+    owner = models.ForeignKey(BudgetUser, related_name='+', on_delete=models.CASCADE, null=True)
     created = models.DateTimeField(auto_now_add = True)
     last_modified = models.DateTimeField(auto_now = True)
     visible = models.BooleanField(default = True)

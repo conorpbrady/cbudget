@@ -80,7 +80,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'cbudget.wsgi.application'
 
 
-
+AUTH_USER_MODEL = 'budget.BudgetUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
