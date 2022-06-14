@@ -9,10 +9,10 @@ from .models import *
 from .serializers import *
 # Create your views here.
 
-
-class AuthMixin:
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+class BudgetUserCreate(generics.CreateAPIView):
+    permission_classes = (permissions.AllowAny,)
+    authentication_classes = ()
+    serializer_class = BudgetUserSerializer
 
 class GroupList(generics.ListCreateAPIView):
     serializer_class = GroupSerializer 

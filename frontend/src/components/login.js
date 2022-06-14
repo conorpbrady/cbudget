@@ -24,13 +24,13 @@ class Login extends Component {
         username: this.state.username,
         password: this.state.password
       })
-      .then((response) => {
+      .then(response => {
       axiosInstance.defaults.headers['Authorization'] = "JWT " + response.data.access;
       localStorage.setItem('access_token', response.data.access);
       localStorage.setItem('refresh_token', response.data.refresh);
       return response.data;
     })
-    .catch((error) => {
+    .catch(error => {
       throw error;
     });
   }

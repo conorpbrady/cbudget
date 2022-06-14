@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import axiosInstance from "../axiosApi";
 
 class Signup extends Component {
   constructor(props) {
@@ -24,6 +25,18 @@ class Signup extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
+
+    axiosInstance.post('/api/user/create/', {
+      username: this.state.username,
+      password: this.state.password,
+      email: this.state.email
+    })
+    .then(response => {
+      return response.data;
+    })
+    .catch(error => {
+      throw(error);
+    });
   }
 
 

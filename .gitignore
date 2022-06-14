@@ -1,5 +1,6 @@
 *.env
 *.pyc
 *.db
+*.swp
 package-lock.json
 node_modules/

@@ -1,6 +1,20 @@
 from rest_framework import serializers
-from .models import Group, Bucket, MonthlyBudget, Account, Payee, Transaction
+from .models import BudgetUser, Group, Bucket, MonthlyBudget, Account, Payee, Transaction
 
+class BudgetUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BudgetUser
+        fields = ('username', 'password', 'email')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+        return instance
+    
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
