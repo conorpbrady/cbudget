@@ -3,17 +3,21 @@ import { Routes, Route, Link } from "react-router-dom";
 import Login from "./login";
 import Signup from "./signup";
 import loggedIn from "../authservice";
+import "./App.css"
 
 class App extends Component {
   render() {
-    let loginLink
+    
+    let loginLink;
+    
     if(loggedIn) {
       console.log("Logged in");
       loginLink = <Link className={"nav-link"} to={"/logout/"}>Logout</Link>
     } else {
       console.log("Not logged in");
       loginLink = <Link className={"nav-link"} to={"/login/"}>Login</Link>
-    } 
+    }
+    
     return (
       <div className="site">
         <nav>
@@ -28,7 +32,7 @@ class App extends Component {
             <Route exact path={"/signup/"} element={<Signup/>} />
             <Route path={"/"} element={<div>Home</div>} />
           </Routes>
-        <p>The user is <b>{loggedIn ? 'currently' : 'not'}</b> logged in</p>
+        <p>The user is <b>{loggedIn ? 'currently' : 'not' }</b> logged in</p>
         </main>
       </div>
     );

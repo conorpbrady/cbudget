@@ -1,0 +1,15 @@
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: yellow;
+}
+
+navbar {
+  width: 100%;
+}
+
+.content {
+  margin: 0;
+  padding: 1em;
+}

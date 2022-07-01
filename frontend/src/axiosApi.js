@@ -1,6 +1,8 @@
 import axios from 'axios'
 
-const axiosInstance = axios.create(
+const baseUrl = 'https://localhost:8000/api/';
+
+const axiosConfig = 
   {
     baseUrl: 'http://localhost:8000/api/',
     timeout: 5000,
@@ -10,7 +12,7 @@ const axiosInstance = axios.create(
       'accept': 'application/json'
     }
   }
-);
+const axiosInstance = axios.create(axiosConfig);
 
 axiosInstance.interceptors.response.use(
   response => response,
@@ -20,9 +22,12 @@ axiosInstance.interceptors.response.use(
 
     if(error.response.data.code === "token_not_valid" &&
       error_status === 401 && 
-      originalRequest.url === baseURL + 'token/refresh/') {
+      originalRequest.url === baseUrl + '/api/token/refresh') {
         window.location.href = '/login';
         return Promise.reject(error);
+    }
+    if(error_status === 401 && originalRequest.url === '/api/token/verify') {
+      return Promise.reject(error);
     }
 
     if(error.response.data.code === "token_not_valid" && error_status === 401 &&
