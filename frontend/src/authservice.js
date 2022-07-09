@@ -1,13 +1,35 @@
 import React from "react";
 import axiosInstance from "./axiosApi";
+import jwt_decode from "jwt-decode";
 
 const refresh = localStorage.getItem("refresh_token");
-const loggedIn = axiosInstance.post('/api/token/verify', {token: refresh})
-                .then(response => {
-                 return Promise.resolve(response.status === 200);
-                })
-                .catch(error => {
-                  console.log(error);
-                });
-export default loggedIn; 
+/*
+const verifyTokenRequest = axiosInstance.post('/api/token/verify', {token: refresh})
+                            .then(response => { return response; })
+                            .catch(error => { console.log(error); });
+*/
+const getUsername = () => {
+  const json = jwt_decode(refresh)
+  return json.username
+}
+
+
+const authenticate = async () => {
+  try {
+    const response = await axiosInstance.post('/api/token/verify', {token: refresh})
+    if(response.status === 200){
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  catch (error) {
+    return false;
+  }
+};
+
+
+
+export { authenticate, getUsername }; 
 

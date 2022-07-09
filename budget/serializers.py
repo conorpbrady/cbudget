@@ -1,5 +1,16 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import BudgetUser, Group, Bucket, MonthlyBudget, Account, Payee, Transaction
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user):
+        token = super(CustomTokenObtainPairSerializer, cls).get_token(user)
+        token['username'] = user.username
+        token['display_name'] = user.display_name
+        return token
 
 class BudgetUserSerializer(serializers.ModelSerializer):
     class Meta:

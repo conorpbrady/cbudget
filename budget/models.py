@@ -5,8 +5,7 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 class BudgetUser(AbstractUser):
-    pass
-
+    display_name = models.CharField(max_length = 32)
 
 class BaseModel(models.Model):
     class Meta:

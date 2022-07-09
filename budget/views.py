@@ -3,11 +3,17 @@ from rest_framework import permissions, generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import *
 from .serializers import *
 # Create your views here.
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = CustomTokenObtainPairSerializer
+
 
 class BudgetUserCreate(generics.CreateAPIView):
     permission_classes = (permissions.AllowAny,)

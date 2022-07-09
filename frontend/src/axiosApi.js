@@ -26,6 +26,10 @@ axiosInstance.interceptors.response.use(
         window.location.href = '/login';
         return Promise.reject(error);
     }
+    if(error_status === 400 && originalRequest.url === '/api/token/verify') {
+      return Promise.reject(error);
+    }
+
     if(error_status === 401 && originalRequest.url === '/api/token/verify') {
       return Promise.reject(error);
     }
