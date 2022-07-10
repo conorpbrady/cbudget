@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.views import exception_handler
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import BudgetUser, Group, Bucket, MonthlyBudget, Account, Payee, Transaction
 
@@ -62,3 +63,17 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ('ta_date', 'ta_account', 'ta_payee', 'ta_bucket', \
                 'note', 'in_amount', 'out_amount', 'cleared', 'reconciled')
+
+def custom_exception_handler(exc, context):
+    response = exception_handler(exc, context)
+
+    if response is not None:
+        custom_response = {}
+        custom_response['errors'] = []
+
+        for key, value in response.data.items():
+            error = {'field': key, 'message': value}
+            custom_response['errors'].append(error)
+    response.data = custom_response 
+    return response
+

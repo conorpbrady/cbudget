@@ -138,6 +138,7 @@ REST_FRAMEWORK = {
         'DEFAULT_AUTHENTICATION_CLASSES': (
             'rest_framework_simplejwt.authentication.JWTAuthentication',
             ),
+        'EXCEPTION_HANDLER': 'budget.serializers.custom_exception_handler',
         }
 
 # Simple JWT settings

@@ -7,7 +7,8 @@ class Signup extends Component {
     this.state = {
       username: "",
       password: "",
-      email: ""
+      email: "",
+      message: ""
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -32,10 +33,18 @@ class Signup extends Component {
       email: this.state.email
     })
     .then(response => {
-      return response.data;
+      
+      this.setState({ username: "", password: "", email: "" });
+      window.location.href = '/login';
     })
     .catch(error => {
-      throw(error);
+      console.log(error);
+      const errorMessages = error.response.data.errors;
+      let message = ""
+      for(let em of errorMessages) {
+        message += "[" + em.field + "] " + em.message + " ";
+      }
+      this.setState({ username: "", password: "", email: "", message: message });
     });
   }
 
@@ -43,6 +52,7 @@ class Signup extends Component {
   render() {
     return (
       <div>
+      <div className="warning">{ this.state.message }</div>
         <form onSubmit={this.handleSubmit}>
           <label>Username:
             <input name="username" type="text" value={this.state.username} onChange={this.handleChange} />

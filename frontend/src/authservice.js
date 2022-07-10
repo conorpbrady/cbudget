@@ -8,13 +8,19 @@ const verifyTokenRequest = axiosInstance.post('/api/token/verify', {token: refre
                             .then(response => { return response; })
                             .catch(error => { console.log(error); });
 */
-const getUsername = () => {
-  const json = jwt_decode(refresh)
-  return json.username
+const getUser = () => {
+  if(refresh === null) {
+    return {user_id: null, username: null, display_name: null};
+  }
+  const json = jwt_decode(refresh);
+  return json;
 }
 
 
 const authenticate = async () => {
+  if(refresh === null) {
+    return false;
+  }
   try {
     const response = await axiosInstance.post('/api/token/verify', {token: refresh})
     if(response.status === 200){
@@ -45,5 +51,5 @@ const logout = async () => {
   
   }
 }
-export { authenticate, getUsername, logout }; 
+export { authenticate, getUser, logout }; 
 

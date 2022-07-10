@@ -2,7 +2,7 @@ import React, { Component, useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import Login from "./login";
 import Signup from "./signup";
-import { authenticate, getUsername, logout } from "../authservice";
+import { authenticate, getUser, logout } from "../authservice";
 import "./App.css"
 
 class App extends Component {
@@ -11,14 +11,19 @@ class App extends Component {
     super(props);
     this.state = {
         isAuthenticated: false,
-        username: null
+        username: null,
+        user_id: null,
+        user_displayname: null
     };
   }
 
   componentDidMount() {
     authenticate().then(isAuthenticated => {
-      const username = getUsername();
-      this.setState({ isAuthenticated, username });
+      const user = getUser();
+      const username = user.username
+      const user_id = user.user_id
+      const user_displayname = user.display_name
+      this.setState({ isAuthenticated, username, user_id, user_displayname });
   
     });
   }
