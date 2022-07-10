@@ -13,7 +13,8 @@ urlpatterns = [
         path(prefix + 'user/create/', views.BudgetUserCreate.as_view(), name='create_user'),
         path(prefix + 'token/obtain/', views.CustomTokenObtainPairView.as_view(), name='token_create'),
         path(prefix + 'token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
-        path(prefix + 'token/verify', jwt_views.TokenVerifyView.as_view(), name='token_verify')
+        path(prefix + 'token/verify', jwt_views.TokenVerifyView.as_view(), name='token_verify'),
+        path(prefix + 'blacklist', views.LogoutAndBlacklistRefreshTokenView.as_view(), name='blacklist')
         ]
 
 

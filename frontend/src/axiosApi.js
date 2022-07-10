@@ -1,6 +1,9 @@
 import axios from 'axios'
+import Cookie from 'js-cookie'
 
 const baseUrl = 'https://localhost:8000/api/';
+
+const csrfToken = Cookie.get('csrftoken');
 
 const axiosConfig = 
   {
@@ -9,7 +12,8 @@ const axiosConfig =
     headers: {
       'Authorization': "JWT " + localStorage.getItem('access_token'),
       'Content-Type': 'application/json',
-      'accept': 'application/json'
+      'accept': 'application/json',
+      'X-CSRFToken': csrfToken
     }
   }
 const axiosInstance = axios.create(axiosConfig);

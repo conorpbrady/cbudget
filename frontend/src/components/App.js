@@ -2,7 +2,7 @@ import React, { Component, useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import Login from "./login";
 import Signup from "./signup";
-import { authenticate, getUsername } from "../authservice";
+import { authenticate, getUsername, logout } from "../authservice";
 import "./App.css"
 
 class App extends Component {
@@ -32,7 +32,7 @@ class App extends Component {
         <nav>
             <Link className={"nav-link"} to={"/"}>Home</Link>
             { isAuthenticated
-              ? <Link className={"nav-link"} to={"/logout/"}>Logout</Link>
+              ? <Link className={"nav-link"} to={"/"} onClick={logout}>Logout</Link>
               : <><Link className={"nav-link"} to={"/login/"}>Login</Link>
                 <Link className={"nav-link"} to={"/signup/"}>Signup</Link></>
             }

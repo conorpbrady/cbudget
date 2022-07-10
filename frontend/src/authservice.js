@@ -29,7 +29,21 @@ const authenticate = async () => {
   }
 };
 
+const logout = async () => {
 
+  try {
 
-export { authenticate, getUsername }; 
+    const response = await axiosInstance.post('/api/blacklist', {token: refresh})
+
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('access_token');
+    axiosInstance.defaults.headers['Authorization'] = null;
+    window.location.href = "/";
+  }
+  catch (err) {
+    console.log(err);
+  
+  }
+}
+export { authenticate, getUsername, logout }; 
 
