@@ -35,12 +35,19 @@ class App extends Component {
     return (
       <div className="site">
         <nav>
-            <Link className={"nav-link"} to={"/"}>Home</Link>
+          <ul>
+            <li>
+            <Link className={"nav-link"} to={"/"}>Home</Link></li>
+            <li>
             { isAuthenticated
               ? <Link className={"nav-link"} to={"/"} onClick={logout}>Logout</Link>
-              : <><Link className={"nav-link"} to={"/login/"}>Login</Link>
-                <Link className={"nav-link"} to={"/signup/"}>Signup</Link></>
+              : <Link className={"nav-link"} to={"/login/"}>Login</Link>
             }
+            </li>
+            <li>
+              <Link className={"nav-link"} to={"/signup/"}>Signup</Link>
+            </li>
+           </ul> 
         </nav>
         <main>
           <h1>It's react time!</h1>
