@@ -1,10 +1,15 @@
 import React, { Component, useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
-import Login from "./login";
-import Signup from "./signup";
+import Login from "./Login";
+import Signup from "./Signup";
 import Navbar from "./Navbar";
 import { authenticate, getUser, logout } from "../api/authservice";
 import "./App.css"
+
+const Profile = () => <h1>Profile</h1>;
+const Accounts = () => <h1>Accounts</h1>;
+const Transactions = () => <h1>Transactions</h1>;
+const Budget = () => <h1>Budget</h1>;
 
 class App extends Component {
 
@@ -39,6 +44,10 @@ class App extends Component {
           <Routes>
             <Route exact path={"/login/"} element={<Login/>} />
             <Route exact path={"/signup/"} element={<Signup/>} />
+            <Route exact path={"/profile/"} element={<Profile />} />
+            <Route exact path={"/accounts/"} element={<Accounts />} />
+            <Route exact path={"/budget/"} element={<Budget />} />
+            <Route exact path={"/transactions/"} element={<Transactions />} />
             <Route path={"/"} element={<div>Home</div>} />
           </Routes>
           <p>Hello {user.username ? user.username : 'anonymous user'}</p>
