@@ -1,6 +1,6 @@
 import React, { Component, useState } from "react";
 import { Link } from "react-router-dom";
-import { logout } from "../authservice";
+import { logout } from "../api/authservice";
 
 class Navbar extends Component {
 

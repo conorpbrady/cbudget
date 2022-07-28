@@ -3,7 +3,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import Login from "./login";
 import Signup from "./signup";
 import Navbar from "./Navbar";
-import { authenticate, getUser, logout } from "../authservice";
+import { authenticate, getUser, logout } from "../api/authservice";
 import "./App.css"
 
 class App extends Component {
