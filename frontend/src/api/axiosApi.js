@@ -22,23 +22,24 @@ axiosInstance.interceptors.response.use(
   response => response,
   error => {
     const originalRequest = error.config;
-    const error_status = error.response.status;
+    const errorStatus = error.response.status;
+    const errorDetails = error.response.data.errors.reduce((obj, item) => (obj[item.field] = item.message, obj), {});
 
-    if(error.response.data.code === "token_not_valid" &&
-      error_status === 401 && 
+    if(errorDetails.code === "token_not_valid" &&
+      errorStatus === 401 && 
       originalRequest.url === baseUrl + '/api/token/refresh') {
         window.location.href = '/login';
         return Promise.reject(error);
     }
-    if(error_status === 400 && originalRequest.url === '/api/token/verify') {
+    if(errorStatus === 400 && originalRequest.url === '/api/token/verify') {
       return Promise.reject(error);
     }
 
-    if(error_status === 401 && originalRequest.url === '/api/token/verify') {
+    if(errorStatus === 401 && originalRequest.url === '/api/token/verify') {
       return Promise.reject(error);
     }
 
-    if(error.response.data.code === "token_not_valid" && error_status === 401 &&
+    if(errorDetails.code === "token_not_valid" && errorStatus === 401 &&
       error.response.statusText === "Unauthorized") {
       
       const refreshToken = localStorage.getItem('refresh_token');
@@ -55,7 +56,7 @@ axiosInstance.interceptors.response.use(
               localStorage.setItem('access_token', response.data.access);
               localStorage.setItem('refresh_token', response.data.refresh);
 
-              axiosInstance.default.headers['Authorization'] = "JWT " + response.data.access;
+              axiosInstance.defaults.headers['Authorization'] = "JWT " + response.data.access;
               originalRequest.headers['Authorization'] = "JWT " + response.data.access;
 
               return axiosInstance(originalRequest);

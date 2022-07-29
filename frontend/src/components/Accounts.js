@@ -19,7 +19,7 @@ class Accounts extends Component {
   componentDidMount() {
     axiosInstance.get('/api/account')
     .then(response => {
-      this.state.accounts = response.data;
+      this.setState({ accounts: response.data });
     })
     .catch(error => { console.log(error) });
   }
@@ -34,12 +34,14 @@ class Accounts extends Component {
   
   handleSubmit(event) {
     event.preventDefault();
-    axiosInstance.post('/api/account', {
+    const newAccount = {
       name: this.state.account_name,
-      account_type: parseInt(this.state.account_type)
-    })
+      account_type: this.state.account_type
+    }
+    axiosInstance.post('/api/account', newAccount)
     .then(response => {
-      const emptyState = {accounts: this.state.accounts, account_name: "", account_type: 0};
+      const emptyState = {accounts: this.state.accounts.concat(newAccount), account_name: "", account_type: 0};
+      this.setState(emptyState);
     })
     .catch(error => {
       console.log(error);
