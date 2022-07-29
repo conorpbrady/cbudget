@@ -41,50 +41,50 @@ class BudgetUserCreate(generics.CreateAPIView):
 class GroupList(generics.ListCreateAPIView):
     serializer_class = GroupSerializer 
     def get_queryset(self):
-        Group.objects.filter(owner = self.request.user)
+        return Group.objects.filter(owner = self.request.user)
     
     def perform_create(self, serializer):
-        Group.save(owner = self.request.user)
+        serializer.save(owner = self.request.user)
 
 class BucketList(generics.ListCreateAPIView):
     serializer_class = BucketSerializer 
     def get_queryset(self):
-        Bucket.objects.filter(owner = self.request.user)
+        return Bucket.objects.filter(owner = self.request.user)
     
     def perform_create(self, serializer):
-        Bucket.save(owner = self.request.user)
+        serializer.save(owner = self.request.user)
 
 class AccountList(generics.ListCreateAPIView):
     serializer_class = AccountSerializer 
     def get_queryset(self):
-        Account.objects.filter(owner = self.request.user)
-    
+        return Account.objects.filter(owner = self.request.user)
+
     def perform_create(self, serializer):
-        Account.save(owner = self.request.user)
+        serializer.save(owner = self.request.user)
 
 class MonthlyBudgetList(generics.ListCreateAPIView):
     serializer_class = MonthlyBudgetSerializer 
     def get_queryset(self):
-        MonthlyBudget.objects.filter(owner = self.request.user)
+        return MonthlyBudget.objects.filter(owner = self.request.user)
     
     def perform_create(self, serializer):
-        MonthlyBudget.save(owner = self.request.user)
+        serializer.save(owner = self.request.user)
 
 class PayeeList(generics.ListCreateAPIView):
     serializer_class = PayeeSerializer 
     def get_queryset(self):
-        Payee.objects.filter(owner = self.request.user)
+        return Payee.objects.filter(owner = self.request.user)
     
     def perform_create(self, serializer):
-        Payee.save(owner = self.request.user)
+        serializer.save(owner = self.request.user)
 
 class TransactionList(generics.ListCreateAPIView):
     serializer_class = TransactionSerializer 
     def get_queryset(self):
-        Transaction.objects.filter(owner = self.request.user)
+        return Transaction.objects.filter(owner = self.request.user)
     
     def perform_create(self, serializer):
-        Transaction.save(owner = self.request.user)
+        serializer.save(owner = self.request.user)
 
 
 
