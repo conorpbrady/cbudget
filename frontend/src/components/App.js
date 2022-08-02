@@ -4,6 +4,7 @@ import Login from "./Login";
 import Signup from "./Signup";
 import Navbar from "./Navbar";
 import Accounts from "./Accounts";
+import Categories from "./Categories";
 import { authenticate, getUser, logout } from "../api/authservice";
 import "./App.css"
 
@@ -24,16 +25,13 @@ class App extends Component {
   componentDidMount() {
     authenticate().then(isAuthenticated => {
       const user = getUser();
-      console.log(user);
       this.setState({ isAuthenticated, user });
-  
     });
   }
 
   render() {
  
     const user = this.state.user;
-
     const isAuthenticated = this.state.isAuthenticated;
     
     return (
@@ -45,8 +43,9 @@ class App extends Component {
             <Route exact path={"/login/"} element={<Login/>} />
             <Route exact path={"/signup/"} element={<Signup/>} />
             <Route exact path={"/profile/"} element={<Profile />} />
-            <Route exact path={"/accounts/"} element={<Accounts user={user.user_id} />} />
+            <Route exact path={"/accounts/"} element={<Accounts />} />
             <Route exact path={"/budget/"} element={<Budget />} />
+            <Route exact path={"/categories/"} element={<Categories />} />
             <Route exact path={"/transactions/"} element={<Transactions />} />
             <Route path={"/"} element={<div>Home</div>} />
           </Routes>

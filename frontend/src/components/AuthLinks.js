@@ -11,6 +11,9 @@ class AuthLinks extends Component {
         <Link className={"nav-link"} to={"/accounts"}>Accounts</Link>
       </li>
       <li>
+        <Link className={"nav-link"} to={"/categories"}>Categories</Link>
+      </li>
+      <li>
         <Link className={"nav-link"} to={"/transactions"}>Transactions</Link>
       </li>
       <li>

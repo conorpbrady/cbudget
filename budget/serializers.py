@@ -30,10 +30,10 @@ class BudgetUserSerializer(serializers.ModelSerializer):
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ('name',)
+        fields = ('id', 'name')
 
 class BucketSerializer(serializers.ModelSerializer):
-    parent = serializers.StringRelatedField(many=True)
+    parent = serializers.StringRelatedField()
     class Meta:
         model = Bucket
         fields = ('parent', 'name')
