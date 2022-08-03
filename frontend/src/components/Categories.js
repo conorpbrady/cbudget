@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import axiosInstance from "../api/axiosApi";
 
 class Categories extends Component {
@@ -6,39 +6,41 @@ class Categories extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      categories: {},
+      categories: [],
       newGroup: {},
       newBucket: {}
     }
   }
 
   componentDidMount() {
-    // TODO: Make two calls in tandem then merge
-    // TODO: Find a better way to create the categories object 
+    // TODO: Make two calls in tandem then merge or have backend return all info in one call
     axiosInstance.get('/api/group')
      .then(response => {
        const groups = response.data;
        axiosInstance.get('/api/bucket')
         .then(response => {
           const buckets = response.data;      
-          let categories = {}
-          groups.map( grp => {
-            categories = {...categories, ...{ 
-              [grp.name]: {
+          let categories = []
+          let categoryMap = {}
+
+          groups.map( (grp, index) => {
+            categoryMap = {...categoryMap, [grp.name]: index}
+            categories.push({ 
+                name: grp.name,
+                tableId: grp.id + "0",
                 id: grp.id,
                 subcategories: []
-              }
-            }}
+              });
           });
-
           buckets.map( bkt => {
-            categories[bkt.parent].subcategories.push({
+            const key = categoryMap[bkt.parent];
+            categories[key].subcategories.push({
+              tableId: "" + categories[key].id + bkt.id,
               id: bkt.id,
               name: bkt.name
             });
           });
-
-          console.log(categories);
+          
           this.setState({ categories });
         })
        .catch(error => { console.log(error) })
@@ -50,32 +52,31 @@ class Categories extends Component {
 
     return (
       <table>
-      <thead>
-      <tr>
-      <th>Category</th>
-      </tr>
-      </thead>
-      <tbody>
-      <CategoryList categories={this.state.categories} />
-      </tbody>
+        <thead>
+          <tr>
+            <th>Category</th>
+            </tr>
+        </thead>
+        <tbody>
+          <CategoryList categories={this.state.categories} />
+        </tbody>
       </table>
     );
   }
 }
 
-// TODO: Make this more readable - rework category object structure
 class CategoryList extends Component {
   render() {
-      const categories = Object.keys(this.props.categories);
-      const categoryList = categories.map((category, index) => {
-        const trKey = index + "0";
+      const categories = this.props.categories;
+      const categoryList = categories.map(category => {
+        
         return (
-          <>
-          <tr key={index}>
-            <td><strong>{category}</strong></td>
+          <Fragment key={category.tableId}>
+          <tr key={category.tableId}>
+            <td><strong>{category.name}</strong></td>
           </tr>
-          <SubCategoryList parentId={this.props.categories[category].id} subcategories={ this.props.categories[category].subcategories } />
-          </>
+          <SubCategoryList subcategories={ category.subcategories } />
+          </Fragment>
         );
       });
     
@@ -87,10 +88,10 @@ class SubCategoryList extends Component {
   render() {
     const subcategories = this.props.subcategories;
     
-    const subcategoryList = subcategories.map((subcategory, index) => {
-        const trKey = this.props.parentId + index + "";
-        return (
-          <tr key={index}>
+    const subcategoryList = subcategories.map(subcategory => {
+        
+      return (
+          <tr key={subcategory.tableId}>
             <td>{subcategory.name}</td>
           </tr>
         );

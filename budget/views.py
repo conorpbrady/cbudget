@@ -65,7 +65,8 @@ class AccountList(generics.ListCreateAPIView):
 class MonthlyBudgetList(generics.ListCreateAPIView):
     serializer_class = MonthlyBudgetSerializer 
     def get_queryset(self):
-        return MonthlyBudget.objects.filter(owner = self.request.user)
+        months = self.request.query_params['months'].split(',')
+        return MonthlyBudget.objects.filter(owner = self.request.user, month__in = months)
     
     def perform_create(self, serializer):
         serializer.save(owner = self.request.user)

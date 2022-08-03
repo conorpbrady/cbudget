@@ -48,7 +48,6 @@ axiosInstance.interceptors.response.use(
         const tokenParts = JSON.parse(atob(refreshToken.split('.')[1]));
 
         const now = Math.ceil(Date.now() / 1000);
-        console.log(tokenParts.exp);
 
         if(tokenParts.exp > now) {
           return axiosInstance.post('/api/token/refresh/', {refresh: refreshToken})

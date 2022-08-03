@@ -36,13 +36,13 @@ class BucketSerializer(serializers.ModelSerializer):
     parent = serializers.StringRelatedField()
     class Meta:
         model = Bucket
-        fields = ('parent', 'name')
+        fields = ('id', 'parent', 'name')
 
 class MonthlyBudgetSerializer(serializers.ModelSerializer):
-    bucket = serializers.StringRelatedField(many=True)
+    category = serializers.StringRelatedField()
     class Meta:
         model = MonthlyBudget
-        fields = ('month', 'bucket', 'amount')
+        fields = ('month', 'category', 'amount')
 
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,15 +50,15 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ('name', 'account_type')
 
 class PayeeSerializer(serializers.ModelSerializer):
-    linked_bucket = serializers.StringRelatedField(many=True) 
+    linked_bucket = serializers.StringRelatedField() 
     class Meta:
         model = Payee
         fields = ('name', 'linked_bucket')
 
 class TransactionSerializer(serializers.ModelSerializer):
-    ta_account = serializers.StringRelatedField(many=True)
-    ta_payee = serializers.StringRelatedField(many=True)
-    ta_bucket = serializers.StringRelatedField(many=True)
+    ta_account = serializers.StringRelatedField()
+    ta_payee = serializers.StringRelatedField()
+    ta_bucket = serializers.StringRelatedField()
     class Meta:
         model = Transaction
         fields = ('ta_date', 'ta_account', 'ta_payee', 'ta_bucket', \

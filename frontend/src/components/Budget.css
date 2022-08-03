@@ -1,0 +1,18 @@
+
+.budget-container {
+  display: flex;
+  width: 80%;
+}
+
+.month-container {
+  padding: 1em;
+  border: 1px solid black;
+}
+
+.budget-entry {
+  padding: 0em .5em
+  }
+
+.budget-item div {
+  padding: 0em 1em;
+}
