@@ -51,6 +51,7 @@ class Categories extends Component {
   render () {
 
     return (
+      <div>
       <table>
         <thead>
           <tr>
@@ -61,6 +62,11 @@ class Categories extends Component {
           <CategoryList categories={this.state.categories} />
         </tbody>
       </table>
+      <div>
+        <Group />
+        <Bucket />
+      </div>
+      </div>
     );
   }
 }
@@ -105,7 +111,9 @@ class Group extends Component {
   
   constructor(props) {
     super(props);
-
+    this.state = {
+      group_name: ''
+    }
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -119,11 +127,25 @@ class Group extends Component {
 
   handleSubmit(event) {
     event.preventDefault
+    newGroup = { name: this.state.group_name }
+    axiosInstance.post('/api/group/', newGroup)
+    .then(response => {
+      this.setState({ group_name: ''});
+    })
+    .catch(error => { console.log(error) });
   }
 
  render() {
-   return (
-    <p>Main groups here</p>
+   return (  
+    <div>
+      <p>Create new category</p>
+      <form onSubmit={this.handleSubmit}>
+        <label>Category Name:
+          <input name="group_name" value={this.state.name} onChange={this.handleChange} />
+        </label>
+        <input type="submit" value="submit" />
+      </form>
+     </div>
    );
  }
 }
@@ -132,7 +154,10 @@ class Bucket extends Component {
   
   constructor(props) {
     super(props);
-
+    this.state = {
+      name: '',
+      parent: ''
+    }
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -149,7 +174,20 @@ class Bucket extends Component {
 
   render() {
     return (
-      <p>Bucket stuff here</p>
+      <div>
+      <p>Create Subcategory</p>
+      <form onSubmit={this.handleSubmit}>
+      <label>Subcategory name
+      <input name="subcat_name" value={this.state.name } onChange={this.handleChange} />
+      </label>
+      <label>Parent Category
+      <select name="parent_name">
+        <option value="1">Option</option>
+      </select>
+      </label>
+      <input type="submit" value="submit" />
+      </form>
+      </div>
     );
   }
 }
