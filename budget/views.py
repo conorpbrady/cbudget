@@ -52,7 +52,8 @@ class BucketList(generics.ListCreateAPIView):
         return Bucket.objects.filter(owner = self.request.user)
     
     def perform_create(self, serializer):
-        serializer.save(owner = self.request.user)
+        parent = Group(self.request.data['parent'])
+        serializer.save(owner = self.request.user, parent = parent)
 
 class AccountList(generics.ListCreateAPIView):
     serializer_class = AccountSerializer 
