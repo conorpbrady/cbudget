@@ -1,3 +1,4 @@
+
 import React, { Component, Fragment } from "react";
 import axiosInstance from "../api/axiosApi";
 
@@ -12,7 +13,7 @@ class Categories extends Component {
         subcat_name: "",
         parent_id: ""
       }
-    }
+    };
 
     this.handleGroupChange = this.handleGroupChange.bind(this);
     this.handleGroupSubmit = this.handleGroupSubmit.bind(this);
@@ -30,8 +31,8 @@ class Categories extends Component {
        axiosInstance.get('/api/bucket')
         .then(response => {
           const buckets = response.data;      
-          let categories = []
-          let categoryMap = {}
+          let categories = [];
+          let categoryMap = {};
 
           groups.map( (grp, index) => {
             categoryMap = {...categoryMap, [grp.name]: index}
@@ -74,14 +75,14 @@ class Categories extends Component {
   }
 
   handleGroupSubmit() {
-    const newGroup = { name: this.state.group_name }
+    const newGroup = { name: this.state.group_name };
     axiosInstance.post('/api/group', newGroup)
     .then(response => {
-      const group_name = ''
+      const group_name = '';
       this.setState({ group_name });
       this.getCategoryList();
     })
-    .catch(error => { console.log(error) })
+    .catch(error => { console.log(error) ;});
   }
 
   handleBucketSubmit() {
@@ -94,12 +95,12 @@ class Categories extends Component {
       const emptyBucket = {
         ...newBucket,
         subcat_name: ''
-      }
-      this.setState({ newBucket: emptyBucket })
+      };
+      this.setState({ newBucket: emptyBucket });
       this.getCategoryList();
       }
     )
-    .catch(error => { console.log(error) });
+    .catch(error => { console.log(error); });
   }
 
   componentDidMount() {

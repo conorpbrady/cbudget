@@ -47,13 +47,13 @@ class MonthlyBudgetSerializer(serializers.ModelSerializer):
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ('name', 'account_type')
+        fields = ('id', 'name', 'account_type')
 
 class PayeeSerializer(serializers.ModelSerializer):
     linked_bucket = serializers.StringRelatedField() 
     class Meta:
         model = Payee
-        fields = ('name', 'linked_bucket')
+        fields = ('id', 'name', 'linked_bucket')
 
 class TransactionSerializer(serializers.ModelSerializer):
     ta_account = serializers.StringRelatedField()

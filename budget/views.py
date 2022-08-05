@@ -86,7 +86,15 @@ class TransactionList(generics.ListCreateAPIView):
         return Transaction.objects.filter(owner = self.request.user)
     
     def perform_create(self, serializer):
-        serializer.save(owner = self.request.user)
+        ta_account = Account(self.request.data['account'])
+        ta_payee = Payee(self.request.data['payee'])
+        ta_bucket = Bucket(self.request.data['category'])
+        serializer.save(
+                owner = self.request.user, 
+                ta_account = ta_account, 
+                ta_payee = ta_payee, 
+                ta_bucket = ta_bucket
+                )
 
 
 
