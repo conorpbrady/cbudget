@@ -100,9 +100,7 @@ class Transactions extends Component {
   }
 
   handleCreate(createdOption, action) {
-    console.log(createdOption);
     const newPayee = { name: createdOption };
-    console.log(newPayee);
     axiosInstance.post('/api/payee', newPayee)
      .then(response => {
         const createdPayee = response.data;
@@ -129,7 +127,12 @@ class Transactions extends Component {
     }
     axiosInstance.post('/api/transaction', newTransaction)
     .then(response => {
-      this.setState({ newTransaction: initTransaction});
+      const createdTransaction = response.data
+      console.log(createdTransaction);
+      this.setState(prevState => ({
+        transactions: [...prevState.transactions, createdTransaction],
+        newTransaction: initTransaction
+      }));
     })
     .catch(error => { console.log(error); });
   }
@@ -154,7 +157,7 @@ class Transactions extends Component {
     const accSelectedOption = accOptions.filter(acc => { return acc.value === parseInt(nt.account)});
     const catSelectedOption = catOptions.filter(cat => { return cat.value === parseInt(nt.category)});
     const paySelectedOption = payOptions.filter(pay => { return pay.value === parseInt(nt.payee)});
-    console.log(nt.payee, payOptions, paySelectedOption);
+    
     return (
       <form onSubmit={this.handleSubmit}>
       <table>
