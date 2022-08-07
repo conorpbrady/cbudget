@@ -35,7 +35,7 @@ class Transactions extends Component {
     this.handleCreate = this.handleCreate.bind(this);
 
   }
-
+  
   //TODO: Make calls in parallel
   //TODO: Refactor
   componentDidMount() {
