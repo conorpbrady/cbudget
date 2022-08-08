@@ -60,12 +60,14 @@ class Payee(BaseModel):
 
 class Transaction(BaseModel):
     ta_date = models.DateField(default = date.today)
-    ta_payee = models.ForeignKey(Payee, related_name='transaction', on_delete=models.RESTRICT, null=True)
-    ta_account = models.ForeignKey(Account, related_name='transaction', on_delete=models.RESTRICT, null=True)
-    ta_bucket = models.ForeignKey(Bucket, related_name='transaction', on_delete=models.RESTRICT, null=True)
+    ta_payee = models.ForeignKey(Payee, related_name='payees', on_delete=models.RESTRICT, null=True)
+    ta_account = models.ForeignKey(Account, related_name='accounts', on_delete=models.RESTRICT, null=True)
+    ta_bucket = models.ForeignKey(Bucket, related_name='buckets', on_delete=models.RESTRICT, null=True)
     note = models.TextField(max_length = 255, blank=True, default='')
     in_amount = models.DecimalField(decimal_places = 2, max_digits = 11, default = 0)
     out_amount = models.DecimalField(decimal_places = 2, max_digits = 11, default = 0)
     cleared = models.BooleanField(default = False)
     reconciled = models.BooleanField(default = False)
 
+    def __str__(self):
+        return "{} {} {}".format(self.ta_account, self.ta_payee, self.ta_bucket)
