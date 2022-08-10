@@ -1,4 +1,13 @@
 
+/* 
+ * dark blue = #212333
+ * mid buule = 6C7A9E
+ * accent blue = 4477B4
+ * light accent = 79a1c4
+ * off-white f0f4f3
+ *
+ */
+
 body {
   margin: 0;
   padding: 0;
@@ -6,7 +15,7 @@ body {
 }
 
 nav {
-  background-color: #41589B;
+  background-color: #212333;
   padding: .5em .2em;
 }
 
@@ -26,7 +35,7 @@ nav a {
 }
 
 nav a:visited {
-  color: #F#F4F3;
+  color: #F5F4F3;
 }
 
 main {

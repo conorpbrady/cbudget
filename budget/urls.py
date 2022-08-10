@@ -9,7 +9,8 @@ urlpatterns = [
         path(prefix + 'monthlybudget', views.MonthlyBudgetList.as_view()),
         path(prefix + 'payee', views.PayeeList.as_view()),
         path(prefix + 'transaction', views.TransactionList.as_view()),
-        
+        path(prefix + 'category', views.CategoryList.as_view()),
+
         path(prefix + 'user/create/', views.BudgetUserCreate.as_view(), name='create_user'),
         path(prefix + 'token/obtain/', views.CustomTokenObtainPairView.as_view(), name='token_create'),
         path(prefix + 'token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),

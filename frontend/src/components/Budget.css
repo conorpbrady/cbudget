@@ -16,3 +16,31 @@
 .budget-item div {
   padding: 0em 1em;
 }
+
+.cat-heading {
+  font-weight: bold;
+}
+
+.heading-row {
+  background-color: #79A1C4;
+  border-bottom: 1px dashed black;
+  border-top: 1px dashed black;
+}
+
+.budget-table {
+  border-spacing: 0px;
+}
+
+.budget-cat {
+  border-right: 1px dashed black;
+}
+
+.budget-diff, .monthly-summary {
+  border-right: 1px dashed black;
+}
+.budget-table th {
+  border-right: 1px dashed black;
+  border-left: 1px dashed black;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}

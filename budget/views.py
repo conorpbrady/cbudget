@@ -99,4 +99,7 @@ class TransactionList(generics.ListCreateAPIView):
         print(self.request.data['account'])
         print(serializer.data)
 
-
+class CategoryList(generics.ListAPIView):
+    serializer_class = CategorySerializer
+    def get_queryset(self):
+        return Group.objects.filter(owner = self.request.user)

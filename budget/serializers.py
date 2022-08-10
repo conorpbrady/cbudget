@@ -65,6 +65,13 @@ class TransactionSerializer(serializers.ModelSerializer):
         fields = ('ta_date', 'ta_account', 'ta_payee', 'ta_bucket', \
                 'note', 'in_amount', 'out_amount', 'cleared', 'reconciled')
 
+class CategorySerializer(serializers.ModelSerializer):
+    bucket = BucketSerializer(many=True)
+
+    class Meta:
+        model = Group;
+        fields = ('id', 'name', 'bucket')
+
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
