@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.views import exception_handler
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import BudgetUser, Group, Bucket, MonthlyBudget, Account, Payee, Transaction
+from .models import BudgetUser, Group, Bucket, MonthlyBudget, Account, Payee, Transaction, Month
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -38,8 +38,14 @@ class BucketSerializer(serializers.ModelSerializer):
         model = Bucket
         fields = ('id', 'parent', 'name')
 
+class MonthSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Month
+        fields = ('id', 'short_name', 'long_name')
+
 class MonthlyBudgetSerializer(serializers.ModelSerializer):
-    category = serializers.StringRelatedField()
+    category = serializers.StringRelatedField(source = 'category.id')
+    month = MonthSerializer()
     class Meta:
         model = MonthlyBudget
         fields = ('month', 'category', 'amount')

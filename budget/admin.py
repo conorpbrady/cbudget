@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BudgetUser, Group, Bucket, MonthlyBudget, Account, Transaction, Payee
+from .models import BudgetUser, Group, Bucket, MonthlyBudget, Account, Transaction, Payee, Month
 from django.contrib.auth.admin import UserAdmin
 # Register your models here.
 
@@ -10,3 +10,4 @@ admin.site.register(MonthlyBudget)
 admin.site.register(Account)
 admin.site.register(Transaction)
 admin.site.register(Payee)
+admin.site.register(Month)

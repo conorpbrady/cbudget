@@ -8,20 +8,29 @@ class Budget extends Component {
     super(props);
     this.state = {
       categories: [],
-      months: ['0822', '0922', '1022'],
+      months: [
+        {id: 1, key: '0822'},
+        {id: 2, key: '0922'},
+        {id: 3, key: '1022'}
+      ],
       budget: {}
     }
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
     const transformData = (data) => {
       let output = {}
       data.map(item => {
-        output[item.category] = {[item.month]: item.amount}
+        output[item.category] = output[item.category] || {};
+        output[item.category] = {
+          ...output[item.category],
+          [item.month.id]: item.amount
+        };
       });
       return output
     }
-    const monthString = this.state.months.join(',');
+    const monthString = this.state.months.map(obj => obj.id).join(",");
     const monthUrl = `/api/monthlybudget?months=${monthString}`;
     axiosInstance.get(monthUrl)
     .then(response => {
@@ -38,6 +47,10 @@ class Budget extends Component {
 
   }
 
+  handleChange(event) {
+    console.log(event.target.name, event.target.value);
+  }
+
   render() {
     const monthIncome = 0;
     const monthSpend = 0;
@@ -50,7 +63,7 @@ class Budget extends Component {
           <th>Categories</th>
           { 
             this.state.months.map((month, index) => {
-              return (<th key={index} colSpan="3">{month}</th>);
+              return (<th key={index} colSpan="3">{month.key}</th>);
             })
           }
           </tr>
@@ -75,7 +88,8 @@ class Budget extends Component {
                 <BudgetLines 
                   months={this.state.months}
                   budget={this.state.budget}
-                  subcategories={category.bucket} />
+                  subcategories={category.bucket} 
+                  handleChange={this.handleChange} />
                 </React.Fragment>
              )})
             }
@@ -93,7 +107,7 @@ function MonthlySummaryLine(props) {
     {
       props.months.map(month => {
         return (
-          <td className='monthly-summary' key={month} colSpan="3">{props.message}</td>
+          <td className='monthly-summary' key={month.id} colSpan="3">{props.message}</td>
         );
       })
     }
@@ -124,9 +138,10 @@ function BudgetLines(props) {
     <tr key={subcategory.id.toString()}>
       <td className='budget-cat'>  {subcategory.name}</td>
       <MonthLines
-        budget={props.budget[subcategory.name]}
+        budget={props.budget[subcategory.id]}
         months={months}
-        subcategory={subcategory}
+        subcategoryId={subcategory.id}
+        handleChange={props.handleChange}
       />
     </tr>
     );
@@ -136,14 +151,20 @@ function BudgetLines(props) {
 
 function MonthLines(props) {
   const budgetData = props.budget || {};
-  const subcategory = props.subcategory || "";
   const monthLines = props.months.map((month, index) => {
-    const entry = budgetData[month] || 0;
+    const entry = budgetData[month.id] || 0;
     const calc = 0;
     const diff = entry - calc;
     return ( 
       <React.Fragment key={index}>
-        <td className='budget-entry'>{entry}</td>
+        <td className='budget-entry'>
+          <input 
+            type="number" 
+            name={`m${month.id}-c${props.subcategoryId}`}
+            value={entry}
+            onChange={props.handleChange}
+            />
+        </td>
         <td className='budget-calc'>{calc}</td>
         <td className='budget-diff'>{diff}</td>
       </React.Fragment>

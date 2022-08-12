@@ -28,9 +28,15 @@ class Bucket(BaseModel):
     def __str__(self):
         return self.name
 
+class Month(models.Model):
+    short_name = models.CharField(max_length = 8)
+    long_name = models.CharField(max_length = 32)
+
+    def __str__(self):
+        return self.long_name
 
 class MonthlyBudget(BaseModel):
-    month = models.CharField(max_length = 32)
+    month = models.ForeignKey(Month, related_name='budget_month', on_delete=models.RESTRICT) 
     amount = models.DecimalField(decimal_places = 2, max_digits = 11, default = 0)
     category = models.ForeignKey(Bucket, related_name='monthly_budget', on_delete=models.RESTRICT, null=True)
 
@@ -71,3 +77,4 @@ class Transaction(BaseModel):
 
     def __str__(self):
         return "{} {} {}".format(self.ta_account, self.ta_payee, self.ta_bucket)
+
