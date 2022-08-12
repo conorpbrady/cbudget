@@ -48,9 +48,21 @@ class Budget extends Component {
   }
 
   handleChange(event) {
-    console.log(event.target.name, event.target.value);
+    const [monthId, categoryId] = event.target.name.split("-").map(s => s.substring(1));
+    this.setState(prevState => ({
+      budget: {
+        ...prevState.budget,
+        [categoryId]: {
+          ...prevState.budget[categoryId],
+          [monthId]: event.target.value
+        }
+      }
+    }));
   }
 
+  handleBlur(event) {
+  }
+    
   render() {
     const monthIncome = 0;
     const monthSpend = 0;
