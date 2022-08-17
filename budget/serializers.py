@@ -33,7 +33,7 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 class BucketSerializer(serializers.ModelSerializer):
-    parent = serializers.StringRelatedField()
+     #parent = serializers.StringRelatedField()
     class Meta:
         model = Bucket
         fields = ('id', 'parent', 'name')
@@ -57,6 +57,7 @@ class MonthlyBudgetSerializer(serializers.ModelSerializer):
 
 class ReadMonthlyBudgetSerializer(serializers.ModelSerializer):
     month = MonthSerializer()
+    category = BucketSerializer()
     class Meta(MonthlyBudgetSerializer.Meta):
         pass
 

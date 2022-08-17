@@ -14,6 +14,7 @@ class Budget extends Component {
         { id: 3, key: '1022' },
       ],
       budget: {},
+      budgetSum: {},
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
@@ -23,9 +24,10 @@ class Budget extends Component {
     const transformData = (data) => {
       let output = {};
       data.map((item) => {
-        output[item.category] = output[item.category] || {};
-        output[item.category] = {
-          ...output[item.category],
+        output[item.category.id] = output[item.category.id] || {};
+        output[item.category.id] = {
+          ...output[item.category.id],
+          parentId: item.category.parent,
           [item.month.id]: {
             id: item.id,
             initAmount: item.amount,
@@ -35,26 +37,54 @@ class Budget extends Component {
       });
       return output;
     };
+    const sumMonthlyTotals = (budget, categories) => {
+ 
+      categories.map(category => {
+        this.state.months.map(month => {
+          let sum = 0;
+          category.bucket.map(subcategory => {
+            if(budget.hasOwnProperty(subcategory.id) && budget[subcategory.id].hasOwnProperty(month.id)) {
+              sum += parseInt(budget[subcategory.id][month.id].amount);
+            }
+          });
+          this.setState(prevState => (
+            {
+              budgetSum: {
+                ...prevState.budgetSum,
+                [category.id]: {
+                  ...prevState.budgetSum[category.id],
+                  [month.id]: sum
+                }
+              }
+            }
+          ));
+        });
+      });
+    }
+
     const monthString = this.state.months.map((obj) => obj.id).join(',');
     const monthUrl = `/api/monthlybudget?months=${monthString}`;
-    axiosInstance
-      .get(monthUrl)
-      .then((response) => {
-        const budgetData = transformData(response.data);
-        this.setState({ budget: budgetData });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
+    
     axiosInstance
       .get('/api/category')
-      .then((response) => {
-        this.setState({ categories: response.data });
+        .then((response) => {
+          const categories = response.data
+          this.setState({ categories });
+          axiosInstance
+            .get(monthUrl)
+            .then((response) => {
+              const budgetData = transformData(response.data);
+              this.setState({ budget: budgetData });
+              sumMonthlyTotals(budgetData, categories);
+          })
+        .catch((error) => {
+          console.log(error);
+        });
       })
       .catch((error) => {
         console.log(error);
       });
+   
   }
 
   handleChange(event) {
@@ -96,13 +126,18 @@ class Budget extends Component {
     const amount = parseInt(event.target.value);
     const month = event.target.dataset.month;
     const category = event.target.dataset.category;
+    const parentId = event.target.dataset.parentid;
     const budget = this.state.budget;
+
 
     let existingAmount = 0;
     if (budget.hasOwnProperty(category) && budget[category].hasOwnProperty(month)) {
+      console.log(category, month, this.state.budget[category][month].initAmount);
       existingAmount = parseInt(this.state.budget[category][month].initAmount);
     }
-    
+
+    existingAmount = existingAmount || 0;
+    console.log(existingAmount); 
     if(amount  === 0) {
       return; 
     }
@@ -124,13 +159,13 @@ class Budget extends Component {
           if(response.status === 201) {
             this.setState(prevState => {
               let prevCategory = {}
-              if(prevState.budget.hasOwnProperty(response.data.category)) {
-                prevCategory = prevState.budget[response.data.category];
+              if(prevState.budget.hasOwnProperty(response.data.category.id)) {
+                prevCategory = prevState.budget[response.data.category.id];
               }
               return ({
                 budget: {
                 ...prevState.budget,
-                [response.data.category]: { 
+                [response.data.category.id]: { 
                   ...prevCategory,
                   [response.data.month.id]: {
                     id: response.data.id,
@@ -140,6 +175,23 @@ class Budget extends Component {
                 }
               }})
             });
+             this.setState(prevState => {
+              const prevValue = prevState.budgetSum[parentId][response.data.month.id] || 0
+              const prevSum = parseInt(prevValue);
+              const deltaSum = parseInt(response.data.amount) - parseInt(existingAmount);
+              const newSum = prevSum + deltaSum;
+              console.log(deltaSum, response.data.amount, existingAmount);
+              return {
+                budgetSum: {
+                  ...prevState.budgetSum,
+                  [parentId]: {
+                    ...prevState.budgetSum[parentId],
+                    [response.data.month.id]: newSum 
+                  }
+               }
+            }
+            });
+
           }
         })
         .catch(error => { console.log(error); });
@@ -151,8 +203,8 @@ class Budget extends Component {
               {
                 budget: {
                   ...prevState.budget,
-                  [response.data.category]: {
-                    ...prevState.budget[response.data.category],
+                  [response.data.category.id]: {
+                    ...prevState.budget[response.data.category.id],
                     [response.data.month.id]: {
                       id: response.data.id,
                       amount: response.data.amount,
@@ -161,7 +213,23 @@ class Budget extends Component {
                   }
                 }
               }
-            ))} 
+            ));
+          }
+            this.setState(prevState => {
+              const prevValue = prevState.budgetSum[parentId][response.data.month.id] || 0
+              const prevSum = parseInt(prevValue);
+              const deltaSum = parseInt(response.data.amount) - parseInt(existingAmount);
+              const newSum = prevSum + deltaSum;
+              return {
+                budgetSum: {
+                  ...prevState.budgetSum,
+                  [parentId]: {
+                    ...prevState.budgetSum[parentId],
+                    [response.data.month.id]: newSum 
+                  }
+               }
+            }
+            });
         })
         .catch(error => { console.log(error); });
     }
@@ -208,17 +276,19 @@ class Budget extends Component {
 
           <tbody>
             {this.state.categories.map((category) => {
+              const categorySum = this.state.budgetSum[category.id] || {}
               return (
                 <React.Fragment key={category.id.toString()}>
                   <tr className="heading-row">
                     <td className="budget-cat cat-heading">{category.name}</td>
-                    <HeadingLines months={this.state.months} />
+                    <HeadingLines months={this.state.months} budgetSum={categorySum} />
                   </tr>
 
                   <BudgetLines
                     months={this.state.months}
                     budget={this.state.budget}
                     subcategories={category.bucket}
+                    parentId={category.id}
                     handleChange={this.handleChange}
                     handleBlur={this.handleBlur}
                   />
@@ -250,9 +320,13 @@ function MonthlySummaryLine(props) {
 function HeadingLines(props) {
   const months = props.months || [];
   const headingLines = months.map((month, index) => {
+    let entrySum = '0.00';
+    if(props.budgetSum.hasOwnProperty(month.id)) {
+      entrySum = props.budgetSum[month.id];
+    }
     return (
       <React.Fragment key={index}>
-        <td className="budget-entry cat-heading">0.00</td>
+        <td className="budget-entry cat-heading">{entrySum}</td>
         <td className="budget-calc cat-heading">0.00</td>
         <td className="budget-diff cat-heading">0.00</td>
       </React.Fragment>
@@ -271,6 +345,7 @@ function BudgetLines(props) {
         <MonthLines
           budget={props.budget[subcategory.id]}
           months={months}
+          parentId={props.parentId}
           subcategoryId={subcategory.id}
           handleChange={props.handleChange}
           handleBlur={props.handleBlur}
@@ -298,6 +373,7 @@ function MonthLines(props) {
           <input
             type="number"
             value={entryAmount}
+            data-parentid={props.parentId}
             data-entry={entryId}
             data-month={month.id}
             data-category={props.subcategoryId}
