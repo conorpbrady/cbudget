@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axiosInstance from '../api/axiosApi';
 import './Budget.css';
+import { splitMonthCatId } from '../utils/utils';
 
 class Budget extends Component {
   constructor(props) {
@@ -15,6 +16,7 @@ class Budget extends Component {
       budget: {},
     };
     this.handleChange = this.handleChange.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
   }
 
   componentDidMount() {
@@ -24,8 +26,12 @@ class Budget extends Component {
         output[item.category] = output[item.category] || {};
         output[item.category] = {
           ...output[item.category],
-          [item.month.id]: item.amount,
-        };
+          [item.month.id]: {
+            id: item.id,
+            initAmount: item.amount,
+            amount: item.amount
+          }
+        }
       });
       return output;
     };
@@ -52,21 +58,116 @@ class Budget extends Component {
   }
 
   handleChange(event) {
-    const [monthId, categoryId] = event.target.name
-      .split('-')
-      .map((s) => s.substring(1));
+    const month = event.target.dataset.month;
+    const category = event.target.dataset.category;
+    if(this.state.budget[category] === undefined) {
+      this.setState(prevState => ({
+        budget: {
+          ...prevState.budget,
+          [category]: {
+            [month]: {}
+          }
+        }
+      }));
+    }
     this.setState((prevState) => ({
       budget: {
         ...prevState.budget,
-        [categoryId]: {
-          ...prevState.budget[categoryId],
-          [monthId]: event.target.value,
+        [category]: {
+          ...prevState.budget[category],
+          [month]: {
+            ...prevState.budget[category][month],
+            amount: event.target.value
+          }
         },
       },
     }));
   }
 
-  handleBlur(event) {}
+  updateInitAmount() {
+
+    }
+  // TODO: This is in desperate need of a refactor
+  // Try to come up with a way to avoid nested state for budget
+  // PUT and POST methods can re-use the same code to update state
+  //
+  handleBlur(event) {
+   
+    const amount = parseInt(event.target.value);
+    const month = event.target.dataset.month;
+    const category = event.target.dataset.category;
+    const budget = this.state.budget;
+
+    let existingAmount = 0;
+    if (budget.hasOwnProperty(category) && budget[category].hasOwnProperty(month)) {
+      existingAmount = parseInt(this.state.budget[category][month].initAmount);
+    }
+    
+    if(amount  === 0) {
+      return; 
+    }
+
+    if (amount === existingAmount) {
+      return;
+    }
+
+    const newBudgetEntry = {
+      month: month, 
+      category: category, 
+      amount: amount
+    };
+    const entryId = event.target.dataset.entry;
+    if(entryId === 0 || entryId === undefined) {
+      axiosInstance.post('/api/monthlybudget', newBudgetEntry)
+        .then(response => {
+          
+          if(response.status === 201) {
+            this.setState(prevState => {
+              let prevCategory = {}
+              if(prevState.budget.hasOwnProperty(response.data.category)) {
+                prevCategory = prevState.budget[response.data.category];
+              }
+              return ({
+                budget: {
+                ...prevState.budget,
+                [response.data.category]: { 
+                  ...prevCategory,
+                  [response.data.month.id]: {
+                    id: response.data.id,
+                    amount: response.data.amount,
+                    initAmount: response.data.amount
+                  }
+                }
+              }})
+            });
+          }
+        })
+        .catch(error => { console.log(error); });
+    } else {
+      axiosInstance.put(`/api/monthlybudget/entry/${entryId}`, newBudgetEntry)
+        .then(response => {
+          if(response.status === 200) {
+            this.setState(prevState => (
+              {
+                budget: {
+                  ...prevState.budget,
+                  [response.data.category]: {
+                    ...prevState.budget[response.data.category],
+                    [response.data.month.id]: {
+                      id: response.data.id,
+                      amount: response.data.amount,
+                      initAmount: response.data.amount
+                    }
+                  }
+                }
+              }
+            ))} 
+        })
+        .catch(error => { console.log(error); });
+    }
+  }
+
+
 
   render() {
     const monthIncome = 0;
@@ -119,6 +220,7 @@ class Budget extends Component {
                     budget={this.state.budget}
                     subcategories={category.bucket}
                     handleChange={this.handleChange}
+                    handleBlur={this.handleBlur}
                   />
                 </React.Fragment>
               );
@@ -171,6 +273,7 @@ function BudgetLines(props) {
           months={months}
           subcategoryId={subcategory.id}
           handleChange={props.handleChange}
+          handleBlur={props.handleBlur}
         />
       </tr>
     );
@@ -181,17 +284,25 @@ function BudgetLines(props) {
 function MonthLines(props) {
   const budgetData = props.budget || {};
   const monthLines = props.months.map((month, index) => {
-    const entry = budgetData[month.id] || 0;
+    let entryId = 0;
+    let entryAmount = 0;
+    if(budgetData.hasOwnProperty(month.id)) {
+        entryId = budgetData[month.id].id;
+        entryAmount = budgetData[month.id].amount;
+    }
     const calc = 0;
-    const diff = entry - calc;
+    const diff = entryAmount - calc;
     return (
       <React.Fragment key={index}>
         <td className="budget-entry">
           <input
             type="number"
-            name={`m${month.id}-c${props.subcategoryId}`}
-            value={entry}
+            value={entryAmount}
+            data-entry={entryId}
+            data-month={month.id}
+            data-category={props.subcategoryId}
             onChange={props.handleChange}
+            onBlur={props.handleBlur}
           />
         </td>
         <td className="budget-calc">{calc}</td>

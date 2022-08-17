@@ -42,13 +42,23 @@ class MonthSerializer(serializers.ModelSerializer):
     class Meta:
         model = Month
         fields = ('id', 'short_name', 'long_name')
-
+    
 class MonthlyBudgetSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(source = 'category.id')
-    month = MonthSerializer()
     class Meta:
         model = MonthlyBudget
-        fields = ('month', 'category', 'amount')
+        fields = ('id', 'month', 'category', 'amount')
+
+    def to_internal_value(self, data):
+        return super(MonthlyBudgetSerializer, self).to_internal_value(data)
+
+    def to_representation(self, instance):
+        return ReadMonthlyBudgetSerializer(instance).data
+
+class ReadMonthlyBudgetSerializer(serializers.ModelSerializer):
+    month = MonthSerializer()
+    class Meta(MonthlyBudgetSerializer.Meta):
+        pass
 
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:

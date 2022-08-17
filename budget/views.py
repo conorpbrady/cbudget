@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .models import *
@@ -32,7 +33,23 @@ class LogoutAndBlacklistRefreshTokenView(APIView):
         except Exception as e:
             print(e)
             return Response(status = status.HTTP_400_BAD_REQUEST)
-            
+
+class MultipleFieldLookupMixin(object):
+    
+    def get_object(self):
+        queryset = self.get_queryset()
+        queryset = self.filter_queryset(queryset)
+        filter = {}
+        for field in self.lookup_fields:
+            print(field)
+            if self.kwargs.get(field, None):
+                filter[field] = self.kwargs[field]
+        obj = get_object_or_404(queryset, **filter)
+        print(field)
+        print(obj)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
 class BudgetUserCreate(generics.CreateAPIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = ()
@@ -70,7 +87,15 @@ class MonthlyBudgetList(generics.ListCreateAPIView):
         return MonthlyBudget.objects.filter(owner = self.request.user, month__in = months)
     
     def perform_create(self, serializer):
-        serializer.save(owner = self.request.user)
+        month = Month.objects.get(id = self.request.data['month'])
+        category = Bucket.objects.get(id = self.request.data['category'])
+        serializer.save(owner = self.request.user, month = month, category = category)
+
+
+class MonthlyBudgetUpdate(generics.UpdateAPIView):
+    serializer_class = MonthlyBudgetSerializer
+    queryset = MonthlyBudget.objects.all()
+    lookup_field = 'id' 
 
 class PayeeList(generics.ListCreateAPIView):
     serializer_class = PayeeSerializer 
@@ -95,9 +120,6 @@ class TransactionList(generics.ListCreateAPIView):
                 ta_payee = ta_payee, 
                 ta_bucket = ta_bucket
                 )
-        print(ta_account)
-        print(self.request.data['account'])
-        print(serializer.data)
 
 class CategoryList(generics.ListAPIView):
     serializer_class = CategorySerializer
