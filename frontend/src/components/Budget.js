@@ -114,9 +114,42 @@ class Budget extends Component {
     }));
   }
 
-  updateInitAmount() {
-
-    }
+  updateBudgetWithNewEntry(category, month, amount, entryId, parentId, existingAmount) {
+    this.setState(prevState => {
+        let prevCategory = {}
+        if(prevState.budget.hasOwnProperty(category)) {
+          prevCategory = prevState.budget[category];
+        }
+        return ({
+          budget: {
+          ...prevState.budget,
+          [category]: { 
+            ...prevCategory,
+            [month]: {
+              id: entryId,
+              amount: amount,
+              initAmount: amount
+            }
+          }
+        }})
+      });
+      
+    this.setState(prevState => {
+        const prevValue = prevState.budgetSum[parentId][month] || 0
+        const prevSum = parseInt(prevValue);
+        const deltaSum = parseInt(amount) - parseInt(existingAmount);
+        const newSum = prevSum + deltaSum;
+        return {
+          budgetSum: {
+            ...prevState.budgetSum,
+            [parentId]: {
+              ...prevState.budgetSum[parentId],
+              [month]: newSum 
+            }
+         }
+      }
+      });
+  }
   // TODO: This is in desperate need of a refactor
   // Try to come up with a way to avoid nested state for budget
   // PUT and POST methods can re-use the same code to update state
@@ -132,18 +165,13 @@ class Budget extends Component {
 
     let existingAmount = 0;
     if (budget.hasOwnProperty(category) && budget[category].hasOwnProperty(month)) {
-      console.log(category, month, this.state.budget[category][month].initAmount);
       existingAmount = parseInt(this.state.budget[category][month].initAmount);
     }
 
     existingAmount = existingAmount || 0;
-    console.log(existingAmount); 
-    if(amount  === 0) {
-      return; 
-    }
 
-    if (amount === existingAmount) {
-      return;
+    if(amount === 0 || amount === existingAmount) {
+      return; 
     }
 
     const newBudgetEntry = {
@@ -157,41 +185,14 @@ class Budget extends Component {
         .then(response => {
           
           if(response.status === 201) {
-            this.setState(prevState => {
-              let prevCategory = {}
-              if(prevState.budget.hasOwnProperty(response.data.category.id)) {
-                prevCategory = prevState.budget[response.data.category.id];
-              }
-              return ({
-                budget: {
-                ...prevState.budget,
-                [response.data.category.id]: { 
-                  ...prevCategory,
-                  [response.data.month.id]: {
-                    id: response.data.id,
-                    amount: response.data.amount,
-                    initAmount: response.data.amount
-                  }
-                }
-              }})
-            });
-             this.setState(prevState => {
-              const prevValue = prevState.budgetSum[parentId][response.data.month.id] || 0
-              const prevSum = parseInt(prevValue);
-              const deltaSum = parseInt(response.data.amount) - parseInt(existingAmount);
-              const newSum = prevSum + deltaSum;
-              console.log(deltaSum, response.data.amount, existingAmount);
-              return {
-                budgetSum: {
-                  ...prevState.budgetSum,
-                  [parentId]: {
-                    ...prevState.budgetSum[parentId],
-                    [response.data.month.id]: newSum 
-                  }
-               }
-            }
-            });
-
+            this.updateBudgetWithNewEntry(
+              response.data.category.id,
+              response.data.month.id,
+              response.data.amount,
+              response.data.id,
+              parentId,
+              existingAmount
+            );
           }
         })
         .catch(error => { console.log(error); });
@@ -199,37 +200,15 @@ class Budget extends Component {
       axiosInstance.put(`/api/monthlybudget/entry/${entryId}`, newBudgetEntry)
         .then(response => {
           if(response.status === 200) {
-            this.setState(prevState => (
-              {
-                budget: {
-                  ...prevState.budget,
-                  [response.data.category.id]: {
-                    ...prevState.budget[response.data.category.id],
-                    [response.data.month.id]: {
-                      id: response.data.id,
-                      amount: response.data.amount,
-                      initAmount: response.data.amount
-                    }
-                  }
-                }
-              }
-            ));
-          }
-            this.setState(prevState => {
-              const prevValue = prevState.budgetSum[parentId][response.data.month.id] || 0
-              const prevSum = parseInt(prevValue);
-              const deltaSum = parseInt(response.data.amount) - parseInt(existingAmount);
-              const newSum = prevSum + deltaSum;
-              return {
-                budgetSum: {
-                  ...prevState.budgetSum,
-                  [parentId]: {
-                    ...prevState.budgetSum[parentId],
-                    [response.data.month.id]: newSum 
-                  }
-               }
-            }
-            });
+            this.updateBudgetWithNewEntry(
+              response.data.category.id,
+              response.data.month.id,
+              response.data.amount,
+              response.data.id,
+              parentId,
+              existingAmount
+            );
+          } 
         })
         .catch(error => { console.log(error); });
     }
