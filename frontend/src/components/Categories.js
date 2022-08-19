@@ -1,278 +1,150 @@
-import React, { Component, Fragment } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import axiosInstance from '../api/axiosApi';
+import {
+  useGetCategories,
+  useGetFirstCategory,
+} from '../hooks/useGetCategories';
+import { submitNewGroup, submitNewBucket } from '../api/categoryApi';
 
-class Categories extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      categories: [],
-      group_name: '',
-      newBucket: {
-        subcat_name: '',
-        parent_id: '',
-      },
-    };
+export default function Categories() {
+  const { categories, firstCategoryId } = useGetCategories();
+  const initBucket = { name: '', parent: firstCategoryId };
 
-    this.handleGroupChange = this.handleGroupChange.bind(this);
-    this.handleGroupSubmit = this.handleGroupSubmit.bind(this);
+  const [newBucket, setNewBucket] = useState(initBucket);
+  const [newGroup, setNewGroup] = useState('');
 
-    this.handleBucketChange = this.handleBucketChange.bind(this);
-    this.handleBucketSubmit = this.handleBucketSubmit.bind(this);
-  }
+  // TODO: This seems unnecessary - Due to state lifecycle / async calls, parent is not
+  // getting updated with a valid category ID on the first render
+  useEffect(() => {
+    if (newBucket.parent === 0) {
+      setNewBucket(initBucket);
+    }
+  }, [firstCategoryId]);
 
-  getCategoryList() {
-    // TODO: Make two calls in tandem then merge or have backend return all info in one call
-    axiosInstance
-      .get('/api/group')
-      .then((response) => {
-        const groups = response.data;
-        axiosInstance
-          .get('/api/bucket')
-          .then((response) => {
-            const buckets = response.data;
-            const categories = [];
-            let categoryMap = {};
+  const handleGroupChange = (event) => {
+    setNewGroup(event.target.value);
+  };
+  const handleGroupSubmit = (event) => {
+    event.preventDefault();
+    setNewGroup('');
+  };
 
-            groups.map((grp, index) => {
-              categoryMap = { ...categoryMap, [grp.name]: index };
-              categories.push({
-                name: grp.name,
-                tableId: grp.id + '0',
-                id: grp.id,
-                subcategories: [],
-              });
-            });
-            buckets.map((bkt) => {
-              const key = categoryMap[bkt.parent];
-              categories[key].subcategories.push({
-                tableId: '' + categories[key].id + bkt.id,
-                id: bkt.id,
-                name: bkt.name,
-              });
-            });
-            if (categories.length) {
-              this.setState((prevState) => ({
-                newBucket: {
-                  ...prevState.newBucket,
-                  parent_id: `${categories[0].id}`,
-                },
-              }));
-            }
-            this.setState({ categories });
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
+  const handleBucketChange = (event) => {
+    setNewBucket({ ...newBucket, [event.target.name]: event.target.value });
+  };
 
-  handleGroupChange(group_name) {
-    this.setState({ group_name });
-  }
+  const handleBucketSubmit = (event) => {
+    event.preventDefault();
+    submitNewBucket(newBucket);
+    setNewBucket(initBucket);
+  };
 
-  handleBucketChange(newBucket) {
-    this.setState({ newBucket });
-  }
-
-  handleGroupSubmit() {
-    const newGroup = { name: this.state.group_name };
-    axiosInstance
-      .post('/api/group', newGroup)
-      .then(() => {
-        const group_name = '';
-        this.setState({ group_name });
-        this.getCategoryList();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
-  handleBucketSubmit() {
-    const newBucket = {
-      name: this.state.newBucket.subcat_name,
-      parent: parseInt(this.state.newBucket.parent_id),
-    };
-    axiosInstance
-      .post('/api/bucket', newBucket)
-      .then(() => {
-        const emptyBucket = {
-          ...newBucket,
-          subcat_name: '',
-        };
-        this.setState({ newBucket: emptyBucket });
-        this.getCategoryList();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
-  componentDidMount() {
-    this.getCategoryList();
-  }
-
-  render() {
-    return (
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th>Category</th>
-            </tr>
-          </thead>
-          <tbody>
-            <CategoryList categories={this.state.categories} />
-          </tbody>
-        </table>
-        <div>
-          <Group
-            group_name={this.state.group_name}
-            onGroupChange={this.handleGroupChange}
-            onGroupSubmit={this.handleGroupSubmit}
-          />
-          <Bucket
-            categories={this.state.categories}
-            newBucket={this.state.newBucket}
-            onBucketChange={this.handleBucketChange}
-            onBucketSubmit={this.handleBucketSubmit}
-          />
-        </div>
-      </div>
-    );
-  }
-}
-
-class CategoryList extends Component {
-  render() {
-    const categories = this.props.categories;
-    const categoryList = categories.map((category) => {
-      return (
-        <Fragment key={category.tableId}>
-          <tr key={category.tableId}>
-            <td>
-              <strong>{category.name}</strong>
-            </td>
+  return (
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
           </tr>
-          <SubCategoryList subcategories={category.subcategories} />
-        </Fragment>
-      );
-    });
-    return categoryList;
-  }
+        </thead>
+        <tbody>
+          <CategoryList categories={categories} />
+        </tbody>
+      </table>
+      <div>
+        <Group
+          newGroup={newGroup}
+          onGroupChange={handleGroupChange}
+          onGroupSubmit={handleGroupSubmit}
+        />
+        <Bucket
+          categories={categories}
+          newBucket={newBucket}
+          onBucketChange={handleBucketChange}
+          onBucketSubmit={handleBucketSubmit}
+        />
+      </div>
+    </div>
+  );
 }
 
-class SubCategoryList extends Component {
-  render() {
-    const subcategories = this.props.subcategories;
-    const subcategoryList = subcategories.map((subcategory) => {
-      return (
-        <tr key={subcategory.tableId}>
-          <td>{subcategory.name}</td>
+function CategoryList(props) {
+  const categoryList = props.categories.map((category) => {
+    return (
+      <Fragment key={category.id}>
+        <tr>
+          <td>
+            <strong>{category.name}</strong>
+          </td>
         </tr>
-      );
-    });
-    return subcategoryList;
-  }
-}
-
-class Group extends Component {
-  constructor(props) {
-    super(props);
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  handleChange(event) {
-    this.props.onGroupChange(event.target.value);
-  }
-
-  handleSubmit(event) {
-    event.preventDefault();
-    this.props.onGroupSubmit();
-  }
-
-  render() {
-    const groupName = this.props.group_name;
-    return (
-      <div>
-        <p>Create new category</p>
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Category Name:
-            <input
-              name="group_name"
-              value={groupName}
-              onChange={this.handleChange}
-            />
-          </label>
-          <input type="submit" value="submit" />
-        </form>
-      </div>
+        <SubCategoryList subcategories={category.bucket} />
+      </Fragment>
     );
-  }
+  });
+  return categoryList;
 }
 
-class Bucket extends Component {
-  constructor(props) {
-    super(props);
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  // TODO: Figure out why this works - read more on setState and optional callback
-  handleChange(event) {
-    const updatedBucket = {
-      ...this.props.newBucket,
-      [event.target.name]: event.target.value,
-    };
-    this.props.onBucketChange(updatedBucket);
-  }
-
-  handleSubmit(event) {
-    event.preventDefault();
-    this.props.onBucketSubmit();
-  }
-
-  render() {
+function SubCategoryList(props) {
+  const subcategoryList = props.subcategories.map((subcategory) => {
     return (
-      <div>
-        <p>Create Subcategory</p>
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Subcategory name
-            <input
-              name="subcat_name"
-              value={this.props.newBucket.subcat_name}
-              onChange={this.handleChange}
-            />
-          </label>
-          <label>
-            Parent Category
-            <select
-              name="parent_id"
-              defaultValue={this.props.newBucket.parent_id}
-              onChange={this.handleChange}
-            >
-              {this.props.categories.map((category, index) => {
-                return (
-                  <option value={category.id} key={index}>
-                    {category.name}
-                  </option>
-                );
-              })}
-            </select>
-          </label>
-          <input type="submit" value="submit" />
-        </form>
-      </div>
+      <tr key={subcategory.id}>
+        <td>{subcategory.name}</td>
+      </tr>
     );
-  }
+  });
+  return subcategoryList;
 }
 
-export default Categories;
+function Group(props) {
+  return (
+    <div>
+      <p>Create new category</p>
+      <form onSubmit={props.onGroupSubmit}>
+        <label>
+          Category Name:
+          <input
+            name="newGroup"
+            value={props.newGroup}
+            onChange={props.onGroupChange}
+          />
+        </label>
+        <input type="submit" value="submit" />
+      </form>
+    </div>
+  );
+}
+
+function Bucket(props) {
+  return (
+    <div>
+      <p>Create Subcategory</p>
+      <form onSubmit={props.onBucketSubmit}>
+        <label>
+          Subcategory name
+          <input
+            name="name"
+            value={props.newBucket.name}
+            onChange={props.onBucketChange}
+          />
+        </label>
+        <label>
+          Parent Category
+          <select
+            name="parent"
+            value={props.newBucket.id}
+            onChange={props.onBucketChange}
+          >
+            {props.categories.map((category) => {
+              return (
+                <option value={category.id} key={category.id}>
+                  {category.name}
+                </option>
+              );
+            })}
+          </select>
+        </label>
+        <input type="submit" value="submit" />
+      </form>
+    </div>
+  );
+}
