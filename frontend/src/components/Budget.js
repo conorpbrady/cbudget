@@ -1,97 +1,22 @@
-import React, { Component } from 'react';
+import React, { useState, useCallback } from 'react';
 import axiosInstance from '../api/axiosApi';
 import './Budget.css';
 import { splitMonthCatId } from '../utils/utils';
+import { submitBudgetEntry, changeBudgetEntry } from '../api/budgetApi';
+import { useGetMonths, useGetCategories, useGetBudget, useGetBudgetSum } from '../hooks/useGetBudgetInfo';
 
-class Budget extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      categories: [],
-      months: [
-        { id: 1, key: '0822' },
-        { id: 2, key: '0922' },
-        { id: 3, key: '1022' },
-      ],
-      budget: {},
-      budgetSum: {},
-    };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleBlur = this.handleBlur.bind(this);
-  }
+export default function Budget() {
 
-  componentDidMount() {
-    const transformData = (data) => {
-      let output = {};
-      data.map((item) => {
-        output[item.category.id] = output[item.category.id] || {};
-        output[item.category.id] = {
-          ...output[item.category.id],
-          parentId: item.category.parent,
-          [item.month.id]: {
-            id: item.id,
-            initAmount: item.amount,
-            amount: item.amount
-          }
-        }
-      });
-      return output;
-    };
-    const sumMonthlyTotals = (budget, categories) => {
- 
-      categories.map(category => {
-        this.state.months.map(month => {
-          let sum = 0;
-          category.bucket.map(subcategory => {
-            if(budget.hasOwnProperty(subcategory.id) && budget[subcategory.id].hasOwnProperty(month.id)) {
-              sum += parseInt(budget[subcategory.id][month.id].amount);
-            }
-          });
-          this.setState(prevState => (
-            {
-              budgetSum: {
-                ...prevState.budgetSum,
-                [category.id]: {
-                  ...prevState.budgetSum[category.id],
-                  [month.id]: sum
-                }
-              }
-            }
-          ));
-        });
-      });
-    }
-
-    const monthString = this.state.months.map((obj) => obj.id).join(',');
-    const monthUrl = `/api/monthlybudget?months=${monthString}`;
-    
-    axiosInstance
-      .get('/api/category')
-        .then((response) => {
-          const categories = response.data
-          this.setState({ categories });
-          axiosInstance
-            .get(monthUrl)
-            .then((response) => {
-              const budgetData = transformData(response.data);
-              this.setState({ budget: budgetData });
-              sumMonthlyTotals(budgetData, categories);
-          })
-        .catch((error) => {
-          console.log(error);
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-   
-  }
-
-  handleChange(event) {
+  const { categories } = useGetCategories();
+  const { months } = useGetMonths();
+  const { budget, setBudget } = useGetBudget(months);
+  const { budgetSum } = useGetBudgetSum(budget, months, categories);
+  
+  const handleChange = (event) => {
     const month = event.target.dataset.month;
     const category = event.target.dataset.category;
-    if(this.state.budget[category] === undefined) {
-      this.setState(prevState => ({
+    if(budget[category] === undefined) {
+      setBudget(prevState => ({
         budget: {
           ...prevState.budget,
           [category]: {
@@ -100,7 +25,7 @@ class Budget extends Component {
         }
       }));
     }
-    this.setState((prevState) => ({
+    setBudget((prevState) => ({
       budget: {
         ...prevState.budget,
         [category]: {
@@ -114,7 +39,7 @@ class Budget extends Component {
     }));
   }
 
-  updateBudgetWithNewEntry(category, month, amount, entryId, parentId, existingAmount) {
+  const updateBudgetWithNewEntry = (category, month, amount, entryId, parentId, existingAmount) => {
     this.setState(prevState => {
         let prevCategory = {}
         if(prevState.budget.hasOwnProperty(category)) {
@@ -154,7 +79,7 @@ class Budget extends Component {
   // Try to come up with a way to avoid nested state for budget
   // PUT and POST methods can re-use the same code to update state
   //
-  handleBlur(event) {
+  const handleBlur = (event) => {
    
     const amount = parseInt(event.target.value);
     const month = event.target.dataset.month;
@@ -180,43 +105,11 @@ class Budget extends Component {
       amount: amount
     };
     const entryId = event.target.dataset.entry;
-    if(entryId === 0 || entryId === undefined) {
-      axiosInstance.post('/api/monthlybudget', newBudgetEntry)
-        .then(response => {
-          
-          if(response.status === 201) {
-            this.updateBudgetWithNewEntry(
-              response.data.category.id,
-              response.data.month.id,
-              response.data.amount,
-              response.data.id,
-              parentId,
-              existingAmount
-            );
-          }
-        })
-        .catch(error => { console.log(error); });
-    } else {
-      axiosInstance.put(`/api/monthlybudget/entry/${entryId}`, newBudgetEntry)
-        .then(response => {
-          if(response.status === 200) {
-            this.updateBudgetWithNewEntry(
-              response.data.category.id,
-              response.data.month.id,
-              response.data.amount,
-              response.data.id,
-              parentId,
-              existingAmount
-            );
-          } 
-        })
-        .catch(error => { console.log(error); });
-    }
+    const submitAsNew = (entryId === 0 || entryId === undefined)
+    const { createdEntry } = submitNewTransaction(newBudgetEntry, submitAsNew);
+  
   }
 
-
-
-  render() {
     const monthIncome = 0;
     const monthSpend = 0;
     const monthDiff = monthIncome - monthSpend;
@@ -226,7 +119,7 @@ class Budget extends Component {
           <thead>
             <tr>
               <th>Categories</th>
-              {this.state.months.map((month, index) => {
+              {months.map((month, index) => {
                 return (
                   <th key={index} colSpan="3">
                     {month.key}
@@ -235,17 +128,17 @@ class Budget extends Component {
               })}
             </tr>
             <MonthlySummaryLine
-              months={this.state.months}
+              months={months}
               message="Income: "
               value={monthIncome}
             />
             <MonthlySummaryLine
-              months={this.state.months}
+              months={months}
               message="Spent: "
               value={monthSpend}
             />
             <MonthlySummaryLine
-              months={this.state.months}
+              months={months}
               message="Difference: "
               value={monthDiff}
               firstCell="Categories"
@@ -254,22 +147,22 @@ class Budget extends Component {
           </thead>
 
           <tbody>
-            {this.state.categories.map((category) => {
-              const categorySum = this.state.budgetSum[category.id] || {}
+            {categories.map((category) => {
+              const categorySum = budgetSum[category.id] || {}
               return (
                 <React.Fragment key={category.id.toString()}>
                   <tr className="heading-row">
                     <td className="budget-cat cat-heading">{category.name}</td>
-                    <HeadingLines months={this.state.months} budgetSum={categorySum} />
+                    <HeadingLines months={months} budgetSum={categorySum} />
                   </tr>
 
                   <BudgetLines
-                    months={this.state.months}
-                    budget={this.state.budget}
+                    months={months}
+                    budget={budget}
                     subcategories={category.bucket}
                     parentId={category.id}
-                    handleChange={this.handleChange}
-                    handleBlur={this.handleBlur}
+                    handleChange={handleChange}
+                    handleBlur={handleBlur}
                   />
                 </React.Fragment>
               );
@@ -278,7 +171,6 @@ class Budget extends Component {
         </table>
       </div>
     );
-  }
 }
 
 function MonthlySummaryLine(props) {
@@ -368,5 +260,3 @@ function MonthLines(props) {
 
   return monthLines;
 }
-
-export default Budget;
