@@ -1,77 +1,48 @@
-import React, { Component } from 'react';
-import axiosInstance from '../api/axiosApi';
+import React, { useState, useCallback } from 'react';
+import { submitLogin } from '../api/loginApi';
 
-class Login extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { username: '', password: '', message: '' };
+export default function Login(props) {
+  const initInputs = { username: '', password: '' };
+  const [message, setMessage] = useState('');
+  const [inputs, setInputs] = useState(initInputs);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+  const handleChange = useCallback(({ target: { name, value } }) =>
+    setInputs((prevState) => ({ ...prevState, [name]: value }), [])
+  );
 
-  handleChange(event) {
-    this.setState({
-      [event.target.name]: event.target.value,
-    });
-  }
-
-  handleSubmit(event) {
+  const handleSubmit = (event) => {
     event.preventDefault();
-    axiosInstance
-      .post('/api/token/obtain/', {
-        username: this.state.username,
-        password: this.state.password,
-      })
-      .then((response) => {
-        const emptyState = { username: '', password: '' };
-        this.setState(emptyState);
+    const message = submitLogin(inputs);
+    setMessage(message);
+    setInputs(initInputs);
+  };
 
-        axiosInstance.defaults.headers['Authorization'] =
-          'JWT ' + response.data.access;
-        localStorage.setItem('access_token', response.data.access);
-        localStorage.setItem('refresh_token', response.data.refresh);
-        window.location.href = '/';
-      })
-      .catch(() => {
-        this.setState({
-          username: '',
-          password: '',
-          message: 'Unable to login with those credentials',
-        });
-      });
-  }
+  return (
+    <div>
+      <div className="warning">{message}</div>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Username:
+          <input
+            name="username"
+            text="text"
+            value={inputs.username}
+            onChange={handleChange}
+          />
+        </label>
 
-  render() {
-    return (
-      <div>
-        <div className="warning">{this.state.message}</div>
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Username:
-            <input
-              name="username"
-              text="text"
-              value={this.state.username}
-              onChange={this.handleChange}
-            />
-          </label>
+        <label>
+          Password:
+          <input
+            name="password"
+            type="password"
+            value={inputs.password}
+            onChange={handleChange}
+          />
+        </label>
 
-          <label>
-            Password:
-            <input
-              name="password"
-              type="password"
-              value={this.state.password}
-              onChange={this.handleChange}
-            />
-          </label>
-
-          <input type="submit" value="Submit" />
-        </form>
-      </div>
-    );
-  }
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+  );
 }
-
-export default Login;

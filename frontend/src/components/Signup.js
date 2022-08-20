@@ -1,95 +1,57 @@
-import React, { Component } from 'react';
-import axiosInstance from '../api/axiosApi';
+import React, { useState, useCallback } from 'react';
+import { submitSignup } from '../api/loginApi';
 
-class Signup extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      username: '',
-      password: '',
-      email: '',
-      message: '',
-    };
+export default function Signup() {
+  const initInputs = { username: '', password: '', email: '' };
+  const [message, setMessage] = useState('');
+  const [inputs, setInputs] = useState(initInputs);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+  const handleChange = useCallback(({ target: { name, value } }) =>
+    setInputs((prevState) => ({ ...prevState, [name]: value }), [])
+  );
 
-  handleChange(event) {
-    this.setState({
-      [event.target.name]: event.target.value,
-    });
-  }
-
-  handleSubmit(event) {
+  const handleSubmit = (event) => {
     event.preventDefault();
+    const message = submitSignup(inputs);
+    setMessage(message);
+    setInputs(initInputs);
+  };
+  return (
+    <div>
+      <div className="warning">{message}</div>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Username:
+          <input
+            name="username"
+            type="text"
+            value={inputs.username}
+            onChange={handleChange}
+          />
+        </label>
 
-    axiosInstance
-      .post('/api/user/create/', {
-        username: this.state.username,
-        password: this.state.password,
-        email: this.state.email,
-      })
-      .then(() => {
-        this.setState({ username: '', password: '', email: '' });
-        window.location.href = '/login';
-      })
-      .catch((error) => {
-        console.log(error);
-        const errorMessages = error.response.data.errors;
-        let message = '';
-        for (let em of errorMessages) {
-          message += '[' + em.field + '] ' + em.message + ' ';
-        }
-        this.setState({
-          username: '',
-          password: '',
-          email: '',
-          message: message,
-        });
-      });
-  }
+        <label>
+          Password:
+          <input
+            name="password"
+            type="password"
+            value={inputs.password}
+            onChange={handleChange}
+          />
+        </label>
 
-  render() {
-    return (
-      <div>
-        <div className="warning">{this.state.message}</div>
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Username:
-            <input
-              name="username"
-              type="text"
-              value={this.state.username}
-              onChange={this.handleChange}
-            />
-          </label>
+        <label>
+          Email:
+          <input
+            name="email"
+            type="text"
+            value={inputs.email}
+            onChange={handleChange}
+          />
+        </label>
 
-          <label>
-            Password:
-            <input
-              name="password"
-              type="password"
-              value={this.state.password}
-              onChange={this.handleChange}
-            />
-          </label>
-
-          <label>
-            Email:
-            <input
-              name="email"
-              type="text"
-              value={this.state.email}
-              onChange={this.handleChange}
-            />
-          </label>
-
-          <input type="submit" value="Submit" />
-        </form>
-      </div>
-    );
-  }
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+  );
 }
-
-export default Signup;

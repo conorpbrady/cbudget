@@ -62,9 +62,11 @@ class ReadMonthlyBudgetSerializer(serializers.ModelSerializer):
         pass
 
 class AccountSerializer(serializers.ModelSerializer):
+    accountName = serializers.CharField(source='name')
+    accountType = serializers.CharField(source='account_type')
     class Meta:
         model = Account
-        fields = ('id', 'name', 'account_type')
+        fields = ('id', 'accountName', 'accountType')
 
 class PayeeSerializer(serializers.ModelSerializer):
     linked_bucket = serializers.StringRelatedField() 

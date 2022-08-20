@@ -1,112 +1,74 @@
-import React, { Component } from 'react';
-import axiosInstance from '../api/axiosApi';
+import React, { useState, useCallback } from 'react';
+import { submitNewAccount } from '../api/accountsApi';
+import { useGetAccounts } from '../hooks/useGetAccounts';
 
-class Accounts extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      accounts: [],
-      account_name: '',
-      account_type: 0,
-    };
+export default function Accounts() {
+  const initInputs = { accountName: '', accountType: 0 };
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+  const [inputs, setInputs] = useState(initInputs);
+  const [fetchToggle, setFetchToggle] = useState(false);
 
-  componentDidMount() {
-    axiosInstance
-      .get('/api/account')
-      .then((response) => {
-        this.setState({ accounts: response.data });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
+  const { accounts } = useGetAccounts(fetchToggle);
 
-  handleChange(event) {
-    this.setState({
-      [event.target.name]: event.target.value,
-    });
-  }
+  const handleChange = useCallback(({ target: { name, value } }) =>
+    setInputs((prevState) => ({ ...prevState, [name]: value }), [])
+  );
 
-  handleSubmit(event) {
+  const handleSubmit = (event) => {
     event.preventDefault();
-    const newAccount = {
-      name: this.state.account_name,
-      account_type: this.state.account_type,
-    };
-    axiosInstance
-      .post('/api/account', newAccount)
-      .then(() => {
-        const emptyState = {
-          accounts: this.state.accounts.concat(newAccount),
-          account_name: '',
-          account_type: 0,
-        };
-        this.setState(emptyState);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
+    submitNewAccount(inputs);
+    setFetchToggle(prevState => !prevState);
+    setInputs(initInputs);
+  };
 
-  render() {
+  return (
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>Account Name</th>
+            <th>Account Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <AccountList accounts={accounts} />
+        </tbody>
+      </table>
+
+      <form onSubmit={handleSubmit}>
+        <label>
+          Account Name:
+          <input
+            name="accountName"
+            type="text"
+            value={inputs.accountName}
+            onChange={handleChange}
+          />
+        </label>
+        <label>
+          Account Type:
+          <select name="accountType" onChange={handleChange}>
+            <option value="0">Cash</option>
+            <option value="1">Checking</option>
+            <option value="2">Savings</option>
+            <option value="3">Credit Card</option>
+          </select>
+        </label>
+
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+  );
+}
+
+function AccountList(props) {
+  const accountList = props.accounts.map((account, index) => {
     return (
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th>Account Name</th>
-              <th>Account Type</th>
-            </tr>
-          </thead>
-          <tbody>
-            <AccountList accounts={this.state.accounts} />
-          </tbody>
-        </table>
-
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Account Name:
-            <input
-              name="account_name"
-              type="text"
-              value={this.state.account_name}
-              onChange={this.handleChange}
-            />
-          </label>
-          <label>
-            Account Type:
-            <select name="account_type" onChange={this.handleChange}>
-              <option value="0">Cash</option>
-              <option value="1">Checking</option>
-              <option value="2">Savings</option>
-              <option value="3">Credit Card</option>
-            </select>
-          </label>
-
-          <input type="submit" value="Submit" />
-        </form>
-      </div>
+      <tr key={index}>
+        <td>{account.accountName}</td>
+        <td>{account.accountType}</td>
+      </tr>
     );
-  }
+  });
+  return accountList;
 }
-
-class AccountList extends Component {
-  render() {
-    const accounts = this.props.accounts;
-    const accountList = accounts.map((account, index) => {
-      return (
-        <tr key={index}>
-          <td>{account.name}</td>
-          <td>{account.account_type}</td>
-        </tr>
-      );
-    });
-
-    return accountList;
-  }
-}
-export default Accounts;

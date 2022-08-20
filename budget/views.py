@@ -78,7 +78,7 @@ class AccountList(generics.ListCreateAPIView):
         return Account.objects.filter(owner = self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(owner = self.request.user)
+        serializer.save(owner = self.request.user) 
 
 class MonthlyBudgetList(generics.ListCreateAPIView):
     serializer_class = MonthlyBudgetSerializer 
