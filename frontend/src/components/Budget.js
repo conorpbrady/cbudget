@@ -3,26 +3,30 @@ import axiosInstance from '../api/axiosApi';
 import './Budget.css';
 import { splitMonthCatId } from '../utils/utils';
 import { submitBudgetEntry, changeBudgetEntry } from '../api/budgetApi';
-import { useGetMonths, useGetCategories, useGetBudget, useGetBudgetSum } from '../hooks/useGetBudgetInfo';
+import {
+  useGetMonths,
+  useGetCategories,
+  useGetBudget,
+  useGetBudgetSum,
+} from '../hooks/useGetBudgetInfo';
 
 export default function Budget() {
-
   const { categories } = useGetCategories();
   const { months } = useGetMonths();
   const { budget, setBudget } = useGetBudget(months);
   const { budgetSum } = useGetBudgetSum(budget, months, categories);
-  
+
   const handleChange = (event) => {
     const month = event.target.dataset.month;
     const category = event.target.dataset.category;
-    if(budget[category] === undefined) {
-      setBudget(prevState => ({
+    if (budget[category] === undefined) {
+      setBudget((prevState) => ({
         budget: {
           ...prevState.budget,
           [category]: {
-            [month]: {}
-          }
-        }
+            [month]: {},
+          },
+        },
       }));
     }
     setBudget((prevState) => ({
@@ -32,145 +36,153 @@ export default function Budget() {
           ...prevState.budget[category],
           [month]: {
             ...prevState.budget[category][month],
-            amount: event.target.value
-          }
+            amount: event.target.value,
+          },
         },
       },
     }));
-  }
+  };
 
-  const updateBudgetWithNewEntry = (category, month, amount, entryId, parentId, existingAmount) => {
-    this.setState(prevState => {
-        let prevCategory = {}
-        if(prevState.budget.hasOwnProperty(category)) {
-          prevCategory = prevState.budget[category];
-        }
-        return ({
-          budget: {
+  const updateBudgetWithNewEntry = (
+    category,
+    month,
+    amount,
+    entryId,
+    parentId,
+    existingAmount
+  ) => {
+    this.setState((prevState) => {
+      let prevCategory = {};
+      if (prevState.budget.hasOwnProperty(category)) {
+        prevCategory = prevState.budget[category];
+      }
+      return {
+        budget: {
           ...prevState.budget,
-          [category]: { 
+          [category]: {
             ...prevCategory,
             [month]: {
               id: entryId,
               amount: amount,
-              initAmount: amount
-            }
-          }
-        }})
-      });
-      
-    this.setState(prevState => {
-        const prevValue = prevState.budgetSum[parentId][month] || 0
-        const prevSum = parseInt(prevValue);
-        const deltaSum = parseInt(amount) - parseInt(existingAmount);
-        const newSum = prevSum + deltaSum;
-        return {
-          budgetSum: {
-            ...prevState.budgetSum,
-            [parentId]: {
-              ...prevState.budgetSum[parentId],
-              [month]: newSum 
-            }
-         }
-      }
-      });
-  }
+              initAmount: amount,
+            },
+          },
+        },
+      };
+    });
+
+    this.setState((prevState) => {
+      const prevValue = prevState.budgetSum[parentId][month] || 0;
+      const prevSum = parseInt(prevValue);
+      const deltaSum = parseInt(amount) - parseInt(existingAmount);
+      const newSum = prevSum + deltaSum;
+      return {
+        budgetSum: {
+          ...prevState.budgetSum,
+          [parentId]: {
+            ...prevState.budgetSum[parentId],
+            [month]: newSum,
+          },
+        },
+      };
+    });
+  };
   // TODO: This is in desperate need of a refactor
   // Try to come up with a way to avoid nested state for budget
   // PUT and POST methods can re-use the same code to update state
   //
   const handleBlur = (event) => {
-   
     const amount = parseInt(event.target.value);
     const month = event.target.dataset.month;
     const category = event.target.dataset.category;
     const parentId = event.target.dataset.parentid;
     const budget = this.state.budget;
 
-
     let existingAmount = 0;
-    if (budget.hasOwnProperty(category) && budget[category].hasOwnProperty(month)) {
+    if (
+      budget.hasOwnProperty(category) &&
+      budget[category].hasOwnProperty(month)
+    ) {
       existingAmount = parseInt(this.state.budget[category][month].initAmount);
     }
 
     existingAmount = existingAmount || 0;
 
-    if(amount === 0 || amount === existingAmount) {
-      return; 
+    if (amount === 0 || amount === existingAmount) {
+      return;
     }
 
     const newBudgetEntry = {
-      month: month, 
-      category: category, 
-      amount: amount
+      month: month,
+      category: category,
+      amount: amount,
     };
     const entryId = event.target.dataset.entry;
-    const submitAsNew = (entryId === 0 || entryId === undefined)
+    const submitAsNew = entryId === 0 || entryId === undefined;
     const { createdEntry } = submitNewTransaction(newBudgetEntry, submitAsNew);
-  
-  }
+  };
 
-    const monthIncome = 0;
-    const monthSpend = 0;
-    const monthDiff = monthIncome - monthSpend;
-    return (
-      <div className="budget-container">
-        <table className="budget-table">
-          <thead>
-            <tr>
-              <th>Categories</th>
-              {months.map((month, index) => {
-                return (
-                  <th key={index} colSpan="3">
-                    {month.key}
-                  </th>
-                );
-              })}
-            </tr>
-            <MonthlySummaryLine
-              months={months}
-              message="Income: "
-              value={monthIncome}
-            />
-            <MonthlySummaryLine
-              months={months}
-              message="Spent: "
-              value={monthSpend}
-            />
-            <MonthlySummaryLine
-              months={months}
-              message="Difference: "
-              value={monthDiff}
-              firstCell="Categories"
-            />
-            <tr></tr>
-          </thead>
-
-          <tbody>
-            {categories.map((category) => {
-              const categorySum = budgetSum[category.id] || {}
+  const monthIncome = 0;
+  const monthSpend = 0;
+  const monthDiff = monthIncome - monthSpend;
+  return (
+    <div className="budget-container">
+      <table className="budget-table">
+        <thead>
+          <tr>
+            <th>Categories</th>
+            {months.map((month, index) => {
               return (
-                <React.Fragment key={category.id.toString()}>
-                  <tr className="heading-row">
-                    <td className="budget-cat cat-heading">{category.name}</td>
-                    <HeadingLines months={months} budgetSum={categorySum} />
-                  </tr>
-
-                  <BudgetLines
-                    months={months}
-                    budget={budget}
-                    subcategories={category.bucket}
-                    parentId={category.id}
-                    handleChange={handleChange}
-                    handleBlur={handleBlur}
-                  />
-                </React.Fragment>
+                <th key={index} colSpan="3">
+                  {month.key}
+                </th>
               );
             })}
-          </tbody>
-        </table>
-      </div>
-    );
+          </tr>
+          <MonthlySummaryLine
+            months={months}
+            message="Income: "
+            value={monthIncome}
+          />
+          <MonthlySummaryLine
+            months={months}
+            message="Spent: "
+            value={monthSpend}
+          />
+          <MonthlySummaryLine
+            months={months}
+            message="Difference: "
+            value={monthDiff}
+            firstCell="Categories"
+          />
+          <tr></tr>
+        </thead>
+
+        <tbody>
+          {categories.map((category) => {
+            const categorySum = budgetSum[category.id] || {};
+            return (
+              <React.Fragment key={category.id.toString()}>
+                <tr className="heading-row">
+                  <td className="budget-cat cat-heading">{category.name}</td>
+                  <HeadingLines months={months} budgetSum={categorySum} />
+                </tr>
+
+                <BudgetLines
+                  months={months}
+                  budget={budget}
+                  subcategories={category.bucket}
+                  parentId={category.id}
+                  handleChange={handleChange}
+                  handleBlur={handleBlur}
+                />
+              </React.Fragment>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function MonthlySummaryLine(props) {
@@ -192,7 +204,7 @@ function HeadingLines(props) {
   const months = props.months || [];
   const headingLines = months.map((month, index) => {
     let entrySum = '0.00';
-    if(props.budgetSum.hasOwnProperty(month.id)) {
+    if (props.budgetSum.hasOwnProperty(month.id)) {
       entrySum = props.budgetSum[month.id];
     }
     return (
@@ -232,9 +244,9 @@ function MonthLines(props) {
   const monthLines = props.months.map((month, index) => {
     let entryId = 0;
     let entryAmount = 0;
-    if(budgetData.hasOwnProperty(month.id)) {
-        entryId = budgetData[month.id].id;
-        entryAmount = budgetData[month.id].amount;
+    if (budgetData.hasOwnProperty(month.id)) {
+      entryId = budgetData[month.id].id;
+      entryAmount = budgetData[month.id].amount;
     }
     const calc = 0;
     const diff = entryAmount - calc;

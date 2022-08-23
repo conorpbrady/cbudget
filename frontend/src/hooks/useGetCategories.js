@@ -20,5 +20,5 @@ export const useGetCategories = () => {
     handleFetch();
   }, []);
 
-  return { categories, firstCategoryId };
+  return { categories, firstCategoryId }
 };

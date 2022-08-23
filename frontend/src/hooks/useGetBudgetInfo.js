@@ -17,18 +17,22 @@ export const useGetCategories = () => {
 };
 
 export const useGetMonths = () => {
- 
-  const [months, setMonths] = useState([{id: 1, key: '0822'}, {id: 2, key: '0922'}, {id: 3, key: '1022'}]);
-  useEffect(() => {
-  }, []);
-  return { months }
-}
+  const [months, setMonths] = useState([
+    { id: 1, key: '0822' },
+    { id: 2, key: '0922' },
+    { id: 3, key: '1022' },
+  ]);
+  useEffect(() => {}, []);
+  return { months };
+};
 export const useGetBudget = (months) => {
- 
   // Memoize this value so useEffect is not called every rerender
-  const monthString = useMemo(() => months.map((obj) => obj.id).join(','), [months]);
+  const monthString = useMemo(
+    () => months.map((obj) => obj.id).join(','),
+    [months]
+  );
   const monthUrl = `/api/monthlybudget?months=${monthString}`;
-  
+
   const [budget, setBudget] = useState([]);
 
   useEffect(() => {
