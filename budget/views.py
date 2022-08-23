@@ -10,6 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Sum
 
 from .models import *
 from .serializers import *
@@ -125,3 +126,20 @@ class CategoryList(generics.ListAPIView):
     serializer_class = CategorySerializer
     def get_queryset(self):
         return Group.objects.filter(owner = self.request.user)
+
+class MonthlySumList(generics.ListAPIView):
+    serializer_class = MonthlySumSerializer
+    def get_queryset(self):
+        months = self.request.query_params['months'].split(',')
+        # Amount Budgeted by Month and Category
+        # SELECT Month, Category,  SUM(AMOUNT) FROM MonthlyBudget 
+        #  WHERE Month IN (1,2,3) GROUP_BY Month, Category
+        return MonthlyBudget.objects.filter(owner = self.request.user, month__in = months) \
+               .values('month', 'category__parent').annotate(budget_amount = Sum('amount'));
+
+        # Amount Spent by Month and Category
+        # SELECT Month, Category, SUM(AMOUNT) FROM Transactions
+        # WHERE Month IN (1,2,3) GROUP_BY Month, Category
+        # Transaction.objects.filter(owner = self.request.user, month__in = months) \
+        #       .values('month', 'category', 'amount').annotate(sum('amount'));
+

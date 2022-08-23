@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import axiosInstance from '../api/axiosApi';
 import './Budget.css';
 import { splitMonthCatId } from '../utils/utils';
 import { submitBudgetEntry, changeBudgetEntry } from '../api/budgetApi';
@@ -21,57 +20,26 @@ export default function Budget() {
     const category = event.target.dataset.category;
     if (budget[category] === undefined) {
       setBudget((prevState) => ({
-        budget: {
-          ...prevState.budget,
-          [category]: {
-            [month]: {},
-          },
+        ...prevState,
+        [category]: {
+          [month]: {},
         },
       }));
     }
+
     setBudget((prevState) => ({
-      budget: {
-        ...prevState.budget,
-        [category]: {
-          ...prevState.budget[category],
-          [month]: {
-            ...prevState.budget[category][month],
-            amount: event.target.value,
-          },
+      ...prevState,
+      [category]: {
+        ...prevState[category],
+        [month]: {
+          ...prevState[category][month],
+          amount: event.target.value,
         },
       },
     }));
   };
 
-  const updateBudgetWithNewEntry = (
-    category,
-    month,
-    amount,
-    entryId,
-    parentId,
-    existingAmount
-  ) => {
-    this.setState((prevState) => {
-      let prevCategory = {};
-      if (prevState.budget.hasOwnProperty(category)) {
-        prevCategory = prevState.budget[category];
-      }
-      return {
-        budget: {
-          ...prevState.budget,
-          [category]: {
-            ...prevCategory,
-            [month]: {
-              id: entryId,
-              amount: amount,
-              initAmount: amount,
-            },
-          },
-        },
-      };
-    });
-
-    this.setState((prevState) => {
+  /*    this.setState((prevState) => {
       const prevValue = prevState.budgetSum[parentId][month] || 0;
       const prevSum = parseInt(prevValue);
       const deltaSum = parseInt(amount) - parseInt(existingAmount);
@@ -86,7 +54,7 @@ export default function Budget() {
         },
       };
     });
-  };
+  }; */
   // TODO: This is in desperate need of a refactor
   // Try to come up with a way to avoid nested state for budget
   // PUT and POST methods can re-use the same code to update state
@@ -96,17 +64,8 @@ export default function Budget() {
     const month = event.target.dataset.month;
     const category = event.target.dataset.category;
     const parentId = event.target.dataset.parentid;
-    const budget = this.state.budget;
 
-    let existingAmount = 0;
-    if (
-      budget.hasOwnProperty(category) &&
-      budget[category].hasOwnProperty(month)
-    ) {
-      existingAmount = parseInt(this.state.budget[category][month].initAmount);
-    }
-
-    existingAmount = existingAmount || 0;
+    const existingAmount = budget[category][month] || 0;
 
     if (amount === 0 || amount === existingAmount) {
       return;
@@ -119,7 +78,20 @@ export default function Budget() {
     };
     const entryId = event.target.dataset.entry;
     const submitAsNew = entryId === 0 || entryId === undefined;
-    const { createdEntry } = submitNewTransaction(newBudgetEntry, submitAsNew);
+    submitBudgetEntry(newBudgetEntry, submitAsNew).then((createdEntry) => {
+      setBudget((prevState) => ({
+        ...prevState,
+        [createdEntry.category]: {
+          ...prevState[category],
+          [createdEntry.month]: {
+            amount: createdEntry.amount,
+            id: createdEntry.id,
+            initAmount: createdEntry.amount,
+          },
+          parentId: parentId,
+        },
+      }));
+    });
   };
 
   const monthIncome = 0;

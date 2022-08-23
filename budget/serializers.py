@@ -88,8 +88,16 @@ class CategorySerializer(serializers.ModelSerializer):
     bucket = BucketSerializer(many=True)
 
     class Meta:
-        model = Group;
+        model = Group
         fields = ('id', 'name', 'bucket')
+
+class MonthlySumSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField(source = 'category__parent')
+    amount = serializers.StringRelatedField(source = 'budget_amount')
+    month = serializers.StringRelatedField()
+    class Meta:
+        model = MonthlyBudget
+        fields = ('month', 'category', 'amount')
 
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)

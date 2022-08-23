@@ -8,6 +8,7 @@ urlpatterns = [
         path(prefix + 'account', views.AccountList.as_view()),
         path(prefix + 'monthlybudget', views.MonthlyBudgetList.as_view()),
         path(prefix + 'monthlybudget/entry/<int:id>', views.MonthlyBudgetUpdate.as_view()),
+        path(prefix + 'monthlysum', views.MonthlySumList.as_view()),
         path(prefix + 'payee', views.PayeeList.as_view()),
         path(prefix + 'transaction', views.TransactionList.as_view()),
         path(prefix + 'category', views.CategoryList.as_view()),

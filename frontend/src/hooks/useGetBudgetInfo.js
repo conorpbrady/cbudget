@@ -55,7 +55,9 @@ export const useGetBudgetSum = (budget, months, categories) => {
   const [budgetSum, setBudgetSum] = useState({});
 
   useEffect(() => {
-    setBudgetSum(sumBudgetData(budget, categories));
-  }, [months, budget]);
+    axiosInstance.get('/api/monthlysum?months=1,2,3').then((response) => {
+      setBudgetSum(response.data);
+    });
+  }, []);
   return { budgetSum };
 };

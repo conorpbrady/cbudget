@@ -11,31 +11,31 @@ export const createEntryObject = (data) => {
 };
 
 export function submitBudgetEntry(newBudgetEntry, createNew) {
-  const [createdEntry, setCreatedEntry] = useState({});
-
   if (createNew) {
-    axiosInstance
-      .post('/api/monthlybudget', newBudgetEntry)
-      .then((response) => {
-        if (response.status === 201) {
-          setCreatedEntry(createEntryObject(response.data));
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    return new Promise((resolve) => {
+      axiosInstance
+        .post('/api/monthlybudget', newBudgetEntry)
+        .then((response) => {
+          if (response.status === 201) {
+            resolve(createEntryObject(response.data));
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
   } else {
-    axiosInstance
-      .put('/api/monthlybudget', newBudgetEntry)
-      .then((response) => {
-        if (response.status === 200) {
-          setCreatedEntry(createEntryObject(response.data));
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    return new Promise((resolve) => {
+      axiosInstance
+        .put('/api/monthlybudget', newBudgetEntry)
+        .then((response) => {
+          if (response.status === 200) {
+            resolve(createEntryObject(response.data));
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
   }
-
-  return { createdEntry };
 }
