@@ -15,6 +15,20 @@ export const transformBudgetData = (data) => {
   return output;
 };
 
+export const transformSumData = (data) => {
+  let output = {};
+  data.map((item) => {
+    output[item.category] = output[item.category] || {};
+    output[item.category] = {
+      ...output[item.category],
+      [item.month]: {
+        amount: item.amount,
+      },
+    };
+  });
+  return output;
+};
+/*
 export const sumBudgetData = (budget, months, categories) => {
   categories = categories || [];
   let output = { budgetSum: {} };
@@ -42,3 +56,4 @@ export const sumBudgetData = (budget, months, categories) => {
   });
   return output;
 };
+*/

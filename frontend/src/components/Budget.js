@@ -13,7 +13,9 @@ export default function Budget() {
   const { categories } = useGetCategories();
   const { months } = useGetMonths();
   const { budget, setBudget } = useGetBudget(months);
-  const { budgetSum } = useGetBudgetSum(budget, months, categories);
+  const { budgetSum } = useGetBudgetSum(months);
+
+  const [ fetchSumToggle, setFetchSumToggle ] = useState(true);
 
   const handleChange = (event) => {
     const month = event.target.dataset.month;
@@ -77,8 +79,7 @@ export default function Budget() {
       amount: amount,
     };
     const entryId = event.target.dataset.entry;
-    const submitAsNew = entryId === 0 || entryId === undefined;
-    submitBudgetEntry(newBudgetEntry, submitAsNew).then((createdEntry) => {
+    submitBudgetEntry(newBudgetEntry, entryId).then((createdEntry) => {
       setBudget((prevState) => ({
         ...prevState,
         [createdEntry.category]: {
@@ -92,6 +93,7 @@ export default function Budget() {
         },
       }));
     });
+    setFetchSumToggle((prevState) => !prevState);
   };
 
   const monthIncome = 0;
@@ -181,7 +183,7 @@ function HeadingLines(props) {
     }
     return (
       <React.Fragment key={index}>
-        <td className="budget-entry cat-heading">{entrySum}</td>
+        <td className="budget-entry cat-heading">{entrySum.amount}</td>
         <td className="budget-calc cat-heading">0.00</td>
         <td className="budget-diff cat-heading">0.00</td>
       </React.Fragment>

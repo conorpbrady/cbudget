@@ -10,8 +10,8 @@ export const createEntryObject = (data) => {
   };
 };
 
-export function submitBudgetEntry(newBudgetEntry, createNew) {
-  if (createNew) {
+export function submitBudgetEntry(newBudgetEntry, existingId) {
+  if (existingId === 0 || existingId === undefined) {
     return new Promise((resolve) => {
       axiosInstance
         .post('/api/monthlybudget', newBudgetEntry)
@@ -27,7 +27,7 @@ export function submitBudgetEntry(newBudgetEntry, createNew) {
   } else {
     return new Promise((resolve) => {
       axiosInstance
-        .put('/api/monthlybudget', newBudgetEntry)
+        .put(`/api/monthlybudget/entry/${existingId}`, newBudgetEntry)
         .then((response) => {
           if (response.status === 200) {
             resolve(createEntryObject(response.data));

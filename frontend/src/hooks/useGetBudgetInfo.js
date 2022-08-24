@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { transformBudgetData, sumBudgetData } from '../utils/budgetUtils';
+import { transformBudgetData, transformSumData } from '../utils/budgetUtils';
 import axiosInstance from '../api/axiosApi';
 
 export const useGetCategories = () => {
@@ -51,13 +51,20 @@ export const useGetBudget = (months) => {
   return { budget, setBudget };
 };
 
-export const useGetBudgetSum = (budget, months, categories) => {
+export const useGetBudgetSum = (months, fetchToggle) => {
   const [budgetSum, setBudgetSum] = useState({});
 
+  const monthString = useMemo(
+    () => months.map((obj) => obj.id).join(','),
+    [months]
+  );
+
   useEffect(() => {
-    axiosInstance.get('/api/monthlysum?months=1,2,3').then((response) => {
-      setBudgetSum(response.data);
-    });
-  }, []);
+    axiosInstance
+      .get(`/api/monthlysum?months=${monthString}`)
+      .then((response) => {
+        setBudgetSum(transformSumData(response.data));
+      });
+  }, [monthString, fetchToggle]);
   return { budgetSum };
 };
