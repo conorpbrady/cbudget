@@ -53,7 +53,6 @@ export const useGetBudget = (months) => {
 
 export const useGetBudgetSum = (months, fetchToggle) => {
   const [budgetSum, setBudgetSum] = useState({});
-
   const monthString = useMemo(
     () => months.map((obj) => obj.id).join(','),
     [months]
@@ -67,4 +66,21 @@ export const useGetBudgetSum = (months, fetchToggle) => {
       });
   }, [monthString, fetchToggle]);
   return { budgetSum };
+};
+
+export const useGetTransactionSum = (months) => {
+  const [transactionSum, setTransactionSum] = useState({});
+  const monthString = useMemo(
+    () => months.map((obj) => obj.id).join(','),
+    [months]
+  );
+
+  useEffect(() => {
+    axiosInstance
+      .get(`/api/transactionsum?months=${monthString}`)
+      .then((response) => {
+        setTransactionSum(transformSumData(response.data));
+      });
+  }, [monthString]);
+  return { transactionSum };
 };

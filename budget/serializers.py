@@ -26,7 +26,7 @@ class BudgetUserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
-    
+
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
@@ -41,8 +41,8 @@ class BucketSerializer(serializers.ModelSerializer):
 class MonthSerializer(serializers.ModelSerializer):
     class Meta:
         model = Month
-        fields = ('id', 'short_name', 'long_name')
-    
+        fields = ('id', 'short_name', 'long_name', 'start_date', 'end_date')
+
 class MonthlyBudgetSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(source = 'category.id')
     class Meta:
@@ -69,7 +69,7 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ('id', 'accountName', 'accountType')
 
 class PayeeSerializer(serializers.ModelSerializer):
-    linked_bucket = serializers.StringRelatedField() 
+    linked_bucket = serializers.StringRelatedField()
     class Meta:
         model = Payee
         fields = ('id', 'name', 'linked_bucket')
@@ -99,16 +99,31 @@ class MonthlySumSerializer(serializers.ModelSerializer):
         model = MonthlyBudget
         fields = ('month', 'category', 'amount')
 
+class TransactionSumSerializer(serializers.ModelSerializer):
+    amount = serializers.StringRelatedField(source = 'ta_amount')
+    category = BucketSerializer(source = 'ta_bucket')
+    month = MonthSerializer()
+
+    class Meta:
+        model = Transaction
+        fields = ('month', 'category', 'amount')
+
+    # Annotating / Grouping by Sum seems to cause Django to return only the FK
+    # Getting the model objects here from FK before returning them
+    def to_representation(self, instance):
+        instance['ta_bucket'] = Bucket.objects.get(id = instance['ta_bucket'])
+        instance['month'] = Month.objects.get(id = instance['month'])
+        return super().to_representation(instance)
+
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
+    custom_response = {}
     if response is not None:
-        custom_response = {}
         custom_response['errors'] = []
 
         for key, value in response.data.items():
             error = {'field': key, 'message': value}
             custom_response['errors'].append(error)
-    response.data = custom_response 
-    return response
-
+        response.data = custom_response
+        return response

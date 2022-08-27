@@ -7,15 +7,18 @@ import {
   useGetCategories,
   useGetBudget,
   useGetBudgetSum,
+  useGetTransactionSum,
 } from '../hooks/useGetBudgetInfo';
 
 export default function Budget() {
   const { categories } = useGetCategories();
   const { months } = useGetMonths();
   const { budget, setBudget } = useGetBudget(months);
-  const { budgetSum } = useGetBudgetSum(months);
+  
+  const [fetchSumToggle, setFetchSumToggle] = useState(true);
 
-  const [ fetchSumToggle, setFetchSumToggle ] = useState(true);
+  const { budgetSum } = useGetBudgetSum(months, fetchSumToggle);
+  const { transactionSum } = useGetTransactionSum(months);
 
   const handleChange = (event) => {
     const month = event.target.dataset.month;
@@ -67,7 +70,7 @@ export default function Budget() {
     const category = event.target.dataset.category;
     const parentId = event.target.dataset.parentid;
 
-    const existingAmount = budget[category][month] || 0;
+    const existingAmount = budget?.[category]?.[month]?.initAmount || 0;
 
     if (amount === 0 || amount === existingAmount) {
       return;
@@ -135,11 +138,16 @@ export default function Budget() {
         <tbody>
           {categories.map((category) => {
             const categorySum = budgetSum[category.id] || {};
+            const transactionCategorySum = transactionSum[category.id] || {}; 
             return (
               <React.Fragment key={category.id.toString()}>
                 <tr className="heading-row">
                   <td className="budget-cat cat-heading">{category.name}</td>
-                  <HeadingLines months={months} budgetSum={categorySum} />
+                  <HeadingLines
+                    months={months}
+                    budgetSum={categorySum}
+                    transactionSum={transactionCategorySum} 
+                  />
                 </tr>
 
                 <BudgetLines
@@ -177,15 +185,14 @@ function MonthlySummaryLine(props) {
 function HeadingLines(props) {
   const months = props.months || [];
   const headingLines = months.map((month, index) => {
-    let entrySum = '0.00';
-    if (props.budgetSum.hasOwnProperty(month.id)) {
-      entrySum = props.budgetSum[month.id];
-    }
+    const entrySum = props.budgetSum[month.id]?.amount || 0;
+    const transactionSum = props.transactionSum[month.id]?.amount || 0;
+    const diff = parseInt(entrySum) + parseInt(transactionSum);
     return (
       <React.Fragment key={index}>
-        <td className="budget-entry cat-heading">{entrySum.amount}</td>
-        <td className="budget-calc cat-heading">0.00</td>
-        <td className="budget-diff cat-heading">0.00</td>
+        <td className="budget-entry cat-heading">{entrySum}</td>
+        <td className="budget-calc cat-heading">{transactionSum}</td>
+        <td className="budget-diff cat-heading">{diff}</td>
       </React.Fragment>
     );
   });
@@ -216,12 +223,9 @@ function BudgetLines(props) {
 function MonthLines(props) {
   const budgetData = props.budget || {};
   const monthLines = props.months.map((month, index) => {
-    let entryId = 0;
-    let entryAmount = 0;
-    if (budgetData.hasOwnProperty(month.id)) {
-      entryId = budgetData[month.id].id;
-      entryAmount = budgetData[month.id].amount;
-    }
+    const entryId = budgetData[month.id]?.id || 0;
+    const entryAmount = budgetData[month.id]?.amount || 0;
+
     const calc = 0;
     const diff = entryAmount - calc;
     return (

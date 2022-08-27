@@ -9,7 +9,9 @@ urlpatterns = [
         path(prefix + 'monthlybudget', views.MonthlyBudgetList.as_view()),
         path(prefix + 'monthlybudget/entry/<int:id>', views.MonthlyBudgetUpdate.as_view()),
         path(prefix + 'monthlysum', views.MonthlySumList.as_view()),
+        path(prefix + 'transactionsum', views.TransactionSumList.as_view()),
         path(prefix + 'payee', views.PayeeList.as_view()),
+
         path(prefix + 'transaction', views.TransactionList.as_view()),
         path(prefix + 'category', views.CategoryList.as_view()),
 
@@ -19,5 +21,3 @@ urlpatterns = [
         path(prefix + 'token/verify', jwt_views.TokenVerifyView.as_view(), name='token_verify'),
         path(prefix + 'blacklist', views.LogoutAndBlacklistRefreshTokenView.as_view(), name='blacklist')
         ]
-
-

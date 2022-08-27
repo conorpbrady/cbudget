@@ -36,18 +36,15 @@ class LogoutAndBlacklistRefreshTokenView(APIView):
             return Response(status = status.HTTP_400_BAD_REQUEST)
 
 class MultipleFieldLookupMixin(object):
-    
+
     def get_object(self):
         queryset = self.get_queryset()
         queryset = self.filter_queryset(queryset)
         filter = {}
         for field in self.lookup_fields:
-            print(field)
             if self.kwargs.get(field, None):
                 filter[field] = self.kwargs[field]
         obj = get_object_or_404(queryset, **filter)
-        print(field)
-        print(obj)
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -57,36 +54,36 @@ class BudgetUserCreate(generics.CreateAPIView):
     serializer_class = BudgetUserSerializer
 
 class GroupList(generics.ListCreateAPIView):
-    serializer_class = GroupSerializer 
+    serializer_class = GroupSerializer
     def get_queryset(self):
         return Group.objects.filter(owner = self.request.user)
-    
+
     def perform_create(self, serializer):
         serializer.save(owner = self.request.user)
 
 class BucketList(generics.ListCreateAPIView):
-    serializer_class = BucketSerializer 
+    serializer_class = BucketSerializer
     def get_queryset(self):
         return Bucket.objects.filter(owner = self.request.user)
-    
+
     def perform_create(self, serializer):
         parent = Group(self.request.data['parent'])
         serializer.save(owner = self.request.user, parent = parent)
 
 class AccountList(generics.ListCreateAPIView):
-    serializer_class = AccountSerializer 
+    serializer_class = AccountSerializer
     def get_queryset(self):
         return Account.objects.filter(owner = self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(owner = self.request.user) 
+        serializer.save(owner = self.request.user)
 
 class MonthlyBudgetList(generics.ListCreateAPIView):
-    serializer_class = MonthlyBudgetSerializer 
+    serializer_class = MonthlyBudgetSerializer
     def get_queryset(self):
         months = self.request.query_params['months'].split(',')
         return MonthlyBudget.objects.filter(owner = self.request.user, month__in = months)
-    
+
     def perform_create(self, serializer):
         month = Month.objects.get(id = self.request.data['month'])
         category = Bucket.objects.get(id = self.request.data['category'])
@@ -96,29 +93,34 @@ class MonthlyBudgetList(generics.ListCreateAPIView):
 class MonthlyBudgetUpdate(generics.UpdateAPIView):
     serializer_class = MonthlyBudgetSerializer
     queryset = MonthlyBudget.objects.all()
-    lookup_field = 'id' 
+    lookup_field = 'id'
 
 class PayeeList(generics.ListCreateAPIView):
-    serializer_class = PayeeSerializer 
+    serializer_class = PayeeSerializer
     def get_queryset(self):
         return Payee.objects.filter(owner = self.request.user)
-    
+
     def perform_create(self, serializer):
         serializer.save(owner = self.request.user)
 
 class TransactionList(generics.ListCreateAPIView):
-    serializer_class = TransactionSerializer 
+    serializer_class = TransactionSerializer
     def get_queryset(self):
         return Transaction.objects.filter(owner = self.request.user)
-    
+
     def perform_create(self, serializer):
         ta_account = Account.objects.get(id = self.request.data['account'])
         ta_payee = Payee.objects.get(id = self.request.data['payee'])
         ta_bucket = Bucket.objects.get(id = self.request.data['category'])
+        query_date = self.request.data['ta_date']
+
+        month = Month.objects.get(start_date__lte = query_date, end_date__gte = query_date)
+
         serializer.save(
-                owner = self.request.user, 
-                ta_account = ta_account, 
-                ta_payee = ta_payee, 
+                owner = self.request.user,
+                month = month,
+                ta_account = ta_account,
+                ta_payee = ta_payee,
                 ta_bucket = ta_bucket
                 )
 
@@ -132,10 +134,10 @@ class MonthlySumList(generics.ListAPIView):
     def get_queryset(self):
         months = self.request.query_params['months'].split(',')
         # Amount Budgeted by Month and Category
-        # SELECT Month, Category,  SUM(AMOUNT) FROM MonthlyBudget 
+        # SELECT Month, Category,  SUM(AMOUNT) FROM MonthlyBudget
         #  WHERE Month IN (1,2,3) GROUP_BY Month, Category
         return MonthlyBudget.objects.filter(owner = self.request.user, month__in = months) \
-               .values('month', 'category__parent').annotate(budget_amount = Sum('amount'));
+               .values('month', 'category__parent').annotate(budget_amount = Sum('amount'))
 
         # Amount Spent by Month and Category
         # SELECT Month, Category, SUM(AMOUNT) FROM Transactions
@@ -143,3 +145,11 @@ class MonthlySumList(generics.ListAPIView):
         # Transaction.objects.filter(owner = self.request.user, month__in = months) \
         #       .values('month', 'category', 'amount').annotate(sum('amount'));
 
+class TransactionSumList(generics.ListAPIView):
+    serializer_class = TransactionSumSerializer
+    def get_queryset(self):
+        months = self.request.query_params['months'].split(',')
+        return Transaction.objects.filter( \
+                owner = self.request.user, month__in = months) \
+                .values('month', 'ta_bucket') \
+                .annotate(ta_amount = (Sum('in_amount') - Sum('out_amount')))

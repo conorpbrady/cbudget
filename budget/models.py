@@ -18,7 +18,7 @@ class BaseModel(models.Model):
 
 class Group(BaseModel):
     name = models.CharField(max_length = 32)
-    
+
     def __str__(self):
         return self.name
 
@@ -31,12 +31,13 @@ class Bucket(BaseModel):
 class Month(models.Model):
     short_name = models.CharField(max_length = 8)
     long_name = models.CharField(max_length = 32)
-
+    start_date = models.DateField()
+    end_date = models.DateField()
     def __str__(self):
         return self.long_name
 
 class MonthlyBudget(BaseModel):
-    month = models.ForeignKey(Month, related_name='budget_month', on_delete=models.RESTRICT) 
+    month = models.ForeignKey(Month, related_name='budget_month', on_delete=models.RESTRICT)
     amount = models.DecimalField(decimal_places = 2, max_digits = 11, default = 0)
     category = models.ForeignKey(Bucket, related_name='monthly_budget', on_delete=models.RESTRICT, null=True)
 
@@ -66,6 +67,7 @@ class Payee(BaseModel):
 
 class Transaction(BaseModel):
     ta_date = models.DateField(default = date.today)
+    month = models.ForeignKey(Month, related_name='month', on_delete=models.RESTRICT)
     ta_payee = models.ForeignKey(Payee, related_name='payees', on_delete=models.RESTRICT, null=True)
     ta_account = models.ForeignKey(Account, related_name='accounts', on_delete=models.RESTRICT, null=True)
     ta_bucket = models.ForeignKey(Bucket, related_name='buckets', on_delete=models.RESTRICT, null=True)
@@ -77,4 +79,3 @@ class Transaction(BaseModel):
 
     def __str__(self):
         return "{} {} {}".format(self.ta_account, self.ta_payee, self.ta_bucket)
-
