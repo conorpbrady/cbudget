@@ -154,9 +154,11 @@ export default function Budget() {
                   months={months}
                   budget={budget}
                   subcategories={category.bucket}
+                  transactionCategorySum={transactionCategorySum}
                   parentId={category.id}
                   handleChange={handleChange}
                   handleBlur={handleBlur}
+
                 />
               </React.Fragment>
             );
@@ -186,7 +188,7 @@ function HeadingLines(props) {
   const months = props.months || [];
   const headingLines = months.map((month, index) => {
     const entrySum = props.budgetSum[month.id]?.amount || 0;
-    const transactionSum = props.transactionSum[month.id]?.amount || 0;
+    const transactionSum = props.transactionSum.amount || 0;
     const diff = parseInt(entrySum) + parseInt(transactionSum);
     return (
       <React.Fragment key={index}>
@@ -211,6 +213,7 @@ function BudgetLines(props) {
           months={months}
           parentId={props.parentId}
           subcategoryId={subcategory.id}
+          transactionCategorySum={props.transactionCategorySum[subcategory.id]}
           handleChange={props.handleChange}
           handleBlur={props.handleBlur}
         />
@@ -224,10 +227,10 @@ function MonthLines(props) {
   const budgetData = props.budget || {};
   const monthLines = props.months.map((month, index) => {
     const entryId = budgetData[month.id]?.id || 0;
-    const entryAmount = budgetData[month.id]?.amount || 0;
+    const entryAmount = parseInt(budgetData[month.id]?.amount) || 0;
 
-    const calc = 0;
-    const diff = entryAmount - calc;
+    const calc = parseInt(props.transactionCategorySum?.[month.id]?.amount) || 0;
+    const diff = entryAmount + calc;
     return (
       <React.Fragment key={index}>
         <td className="budget-entry">

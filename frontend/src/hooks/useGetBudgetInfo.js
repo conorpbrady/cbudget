@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { transformBudgetData, transformSumData } from '../utils/budgetUtils';
+import {
+  transformBudgetData,
+  transformSumData,
+  transformTransactionSumData,
+} from '../utils/budgetUtils';
 import axiosInstance from '../api/axiosApi';
 
 export const useGetCategories = () => {
@@ -79,7 +83,7 @@ export const useGetTransactionSum = (months) => {
     axiosInstance
       .get(`/api/transactionsum?months=${monthString}`)
       .then((response) => {
-        setTransactionSum(transformSumData(response.data));
+        setTransactionSum(transformTransactionSumData(response.data));
       });
   }, [monthString]);
   return { transactionSum };

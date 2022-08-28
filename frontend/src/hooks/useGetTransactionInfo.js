@@ -14,7 +14,13 @@ export const useGetTransactionInfo = (fetchToggle) => {
         axiosInstance.get('/api/account').then((response) => {
           setAccounts(response.data);
           axiosInstance.get('/api/category').then((response) => {
-            setCategories(response.data);
+            const parents = response.data;
+            let categories = [];
+            parents.map((subcategories) => {
+              categories = [...categories, ...subcategories.bucket];
+            });
+            setCategories(categories);
+
             axiosInstance.get('/api/payee').then((response) => {
               setPayees(response.data);
             });

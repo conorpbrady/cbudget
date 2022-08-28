@@ -28,6 +28,29 @@ export const transformSumData = (data) => {
   });
   return output;
 };
+
+export const transformTransactionSumData = (data) => {
+  let output = {};
+  let parentSum = {};
+
+  data.map((item) => {
+
+    const currentSum = parseInt(output[item.category.parent]?.amount) || 0;
+    const newSum = currentSum + parseInt(item.amount);
+    output = {
+      ...output,
+      [item.category.parent]: {
+        ...output[item.category.parent],
+        [item.category.id]: {
+          ...output[item.category.parent]?.[item.category.id],
+          [item.month.id]: { amount: item.amount },
+        },
+        amount: newSum,
+      },
+    };
+  });
+  return output;
+};
 /*
 export const sumBudgetData = (budget, months, categories) => {
   categories = categories || [];
