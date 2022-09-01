@@ -115,6 +115,21 @@ class TransactionSumSerializer(serializers.ModelSerializer):
         instance['month'] = Month.objects.get(id = instance['month'])
         return super().to_representation(instance)
 
+class CumSumSerializer(serializers.Serializer):
+    month = MonthSerializer()
+    category = BucketSerializer()
+    budgetAmount = serializers.DecimalField(decimal_places = 2, max_digits = 11)
+    budgetSum = serializers.DecimalField(decimal_places = 2, max_digits = 11)
+    transactionAmount = serializers.DecimalField(decimal_places = 2, max_digits = 11)
+    transactionSum = serializers.DecimalField(decimal_places = 2, max_digits = 11)
+    class Meta:
+        fields = ('month', 'category', 'budgetAmount', 'transactionAmount', 'budgetSum', 'transactionSum')
+
+    def to_representation(self, instance):
+        instance['month'] = Month.objects.get(id = instance['month'])
+        instance['category'] = Bucket.objects.get(id = instance['category'])
+        return super().to_representation(instance)
+
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 

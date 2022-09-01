@@ -80,6 +80,8 @@ export const useGetTransactionSum = (months) => {
   );
 
   useEffect(() => {
+    axiosInstance.get('/api/cumsum').then((response) => console.log(response));
+    console.log('hi');
     axiosInstance
       .get(`/api/transactionsum?months=${monthString}`)
       .then((response) => {

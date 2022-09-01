@@ -4,6 +4,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import viewsets
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -11,6 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Sum
+from django.db import connection
 
 from .models import *
 from .serializers import *
@@ -153,3 +155,39 @@ class TransactionSumList(generics.ListAPIView):
                 owner = self.request.user, month__in = months) \
                 .values('month', 'ta_bucket') \
                 .annotate(ta_amount = (Sum('in_amount') - Sum('out_amount')))
+
+class CumSumList(viewsets.ViewSet):
+    query_string = """
+    WITH MonthSums AS (
+	    SELECT mb.month_id as month,
+    	mb.category_id as category,
+        SUM(mb.Amount) as budgetAmount,
+        SUM(t.in_amount) - SUM(t.out_amount) as transactionAmount
+    	FROM budget_MonthlyBudget mb
+        LEFT JOIN budget_month as m ON m.id = mb.month_id
+        LEFT JOIN budget_bucket as c ON c.id = mb.category_id
+        LEFT JOIN budget_transaction as t ON t.month_id = m.id AND t.ta_bucket_id = c.id
+    	GROUP BY mb.month_id, mb.category_id
+    )
+    SELECT ms1.month,
+            ms1.category,
+            ms1.budgetAmount as budgetAmount,
+            ms1.transactionAmount as transactionAmount,
+            SUM(ms2.BudgetAmount) as budgetSum,
+      SUM(ms2.transactionAmount) as transactionSum FROM MonthSums ms1
+    INNER JOIN MonthSums ms2 on ms1.Month >= ms2.Month AND ms1.Category = ms2.Category
+    GROUP BY ms1.Month, ms1.Category
+    """
+
+    def list(self, request):
+        with connection.cursor() as cursor:
+            cursor.execute(self.query_string)
+            columns = [col[0] for col in cursor.description]
+            instance = [
+                dict(zip(columns, row))
+                for row in cursor.fetchall()
+                ]
+        print(instance)
+        serializer = CumSumSerializer(instance, many = True)
+        print(serializer.data)
+        return Response(serializer.data)

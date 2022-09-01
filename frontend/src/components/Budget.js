@@ -72,7 +72,7 @@ export default function Budget() {
 
     const existingAmount = budget?.[category]?.[month]?.initAmount || 0;
 
-    if (amount === 0 || amount === existingAmount) {
+    if (amount === existingAmount) {
       return;
     }
 
