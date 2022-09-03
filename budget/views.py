@@ -187,7 +187,5 @@ class CumSumList(viewsets.ViewSet):
                 dict(zip(columns, row))
                 for row in cursor.fetchall()
                 ]
-        print(instance)
         serializer = CumSumSerializer(instance, many = True)
-        print(serializer.data)
         return Response(serializer.data)

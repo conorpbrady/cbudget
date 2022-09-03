@@ -17,19 +17,46 @@ export const transformBudgetData = (data) => {
 
 export const transformSumData = (data) => {
   let output = {};
+
   data.map((item) => {
-    output[item.category] = output[item.category] || {};
-    output[item.category] = {
-      ...output[item.category],
-      [item.month]: {
-        amount: item.amount,
+
+    const budgetTotal = parseInt(output[item.category.parent]?.months?.[item.month.id]?.budgetTotal || 0)
+    const newBudgetTotal = budgetTotal + parseInt(item.budgetSum || 0)
+    
+    const transactionTotal = parseInt(output[item.category.parent]?.months?.[item.month.id]?.transactionTotal || 0);
+    const newTransactionTotal = transactionTotal + parseInt(item.transactionAmount || 0);
+
+    output[item.category.id] = output[item.category.id] || {};
+    output = {
+      ...output,
+      [item.category.parent]: {
+        ...output[item.category.parent],
+        subcategories: {
+          ...output[item.category.parent]?.subcategories,
+          [item.category.id]: {
+            ...output[item.category.parent]?.subcategories?.[item.category.id],
+            [item.month.id]: {
+              budgetAmount: item.budgetAmount,
+              budgetSum: item.budgetSum,
+              transactionAmount: item.transactionAmount,
+              transactionSum: item.transactionSum,
+            },
+          },
+        },
+        months: {
+          ...output[item.category.parent]?.months,
+          [item.month.id]: {
+            transactionTotal: newTransactionTotal,
+            budgetTotal: newBudgetTotal,
+          }
+        },
       },
     };
   });
   return output;
 };
-
-export const transformTransactionSumData = (data) => {
+/*
+export const transformSumData = (data) => {
   let output = {};
   let parentSum = {};
 
@@ -48,34 +75,6 @@ export const transformTransactionSumData = (data) => {
         amount: newSum,
       },
     };
-  });
-  return output;
-};
-/*
-export const sumBudgetData = (budget, months, categories) => {
-  categories = categories || [];
-  let output = { budgetSum: {} };
-  categories.map((category) => {
-    months.map((month) => {
-      let sum = 0;
-      category.bucket.map((subcategory) => {
-        if (
-          budget.hasOwnProperty(subcategory.id) &&
-          budget[subcategory.id].hasOwnProperty(month.id)
-        ) {
-          sum += parseInt(budget[subcategory.id][month.id].amount);
-        }
-      });
-      output = {
-        budgetSum: {
-          ...output.budgetSum,
-          [category.id]: {
-            ...output.budgetSum[category.id],
-            [month.id]: sum,
-          },
-        },
-      };
-    });
   });
   return output;
 };

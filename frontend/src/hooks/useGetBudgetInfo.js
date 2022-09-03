@@ -55,38 +55,13 @@ export const useGetBudget = (months) => {
   return { budget, setBudget };
 };
 
-export const useGetBudgetSum = (months, fetchToggle) => {
-  const [budgetSum, setBudgetSum] = useState({});
-  const monthString = useMemo(
-    () => months.map((obj) => obj.id).join(','),
-    [months]
-  );
+export const useGetSumData = (fetchToggle) => {
+  const [sumData, setSumData] = useState({});
 
   useEffect(() => {
-    axiosInstance
-      .get(`/api/monthlysum?months=${monthString}`)
-      .then((response) => {
-        setBudgetSum(transformSumData(response.data));
-      });
-  }, [monthString, fetchToggle]);
-  return { budgetSum };
-};
-
-export const useGetTransactionSum = (months) => {
-  const [transactionSum, setTransactionSum] = useState({});
-  const monthString = useMemo(
-    () => months.map((obj) => obj.id).join(','),
-    [months]
-  );
-
-  useEffect(() => {
-    axiosInstance.get('/api/cumsum').then((response) => console.log(response));
-    console.log('hi');
-    axiosInstance
-      .get(`/api/transactionsum?months=${monthString}`)
-      .then((response) => {
-        setTransactionSum(transformTransactionSumData(response.data));
-      });
-  }, [monthString]);
-  return { transactionSum };
+    axiosInstance.get('/api/sums').then((response) => {
+      setSumData(transformSumData(response.data));
+    });
+  }, [fetchToggle]);
+  return { sumData };
 };

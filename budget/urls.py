@@ -10,7 +10,7 @@ urlpatterns = [
         path(prefix + 'monthlybudget/entry/<int:id>', views.MonthlyBudgetUpdate.as_view()),
         path(prefix + 'monthlysum', views.MonthlySumList.as_view()),
         path(prefix + 'transactionsum', views.TransactionSumList.as_view()),
-        path(prefix + 'cumsum', views.CumSumList.as_view({ 'get': 'list' })),
+        path(prefix + 'sums', views.CumSumList.as_view({ 'get': 'list' })),
         path(prefix + 'payee', views.PayeeList.as_view()),
 
         path(prefix + 'transaction', views.TransactionList.as_view()),
