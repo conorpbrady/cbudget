@@ -3,6 +3,7 @@ import { useGetTransactionInfo } from '../hooks/useGetTransactionInfo';
 import { submitNewTransaction, submitNewPayee } from '../api/transactionApi';
 import Select from 'react-select';
 import Creatable from 'react-select/creatable';
+import { Table, Alert, Button } from 'react-bootstrap';
 
 export default function Transaction() {
   const initTransaction = {
@@ -76,7 +77,7 @@ export default function Transaction() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <table>
+      <Table striped>
         <thead>
           <tr>
             <th>Date</th>
@@ -171,7 +172,7 @@ export default function Transaction() {
           </tr>
           <TransactionList transactions={transactions} />
         </tbody>
-      </table>
+      </Table>
     </form>
   );
 }

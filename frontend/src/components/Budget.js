@@ -8,6 +8,7 @@ import {
   useGetBudget,
   useGetSumData,
 } from '../hooks/useGetBudgetInfo';
+import { Table, Button, Alert } from 'react-bootstrap';
 
 export default function Budget() {
   const { categories } = useGetCategories();
@@ -103,7 +104,7 @@ export default function Budget() {
   const monthDiff = monthIncome - monthSpend;
   return (
     <div className="budget-container">
-      <table className="budget-table">
+      <Table size='sm' className="budget-table">
         <thead>
           <tr>
             <th>Categories</th>
@@ -161,7 +162,7 @@ export default function Budget() {
             );
           })}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
 }
