@@ -44,26 +44,6 @@ export default function Budget() {
     }));
   };
 
-  /*    this.setState((prevState) => {
-      const prevValue = prevState.budgetSum[parentId][month] || 0;
-      const prevSum = parseInt(prevValue);
-      const deltaSum = parseInt(amount) - parseInt(existingAmount);
-      const newSum = prevSum + deltaSum;
-      return {
-        budgetSum: {
-          ...prevState.budgetSum,
-          [parentId]: {
-            ...prevState.budgetSum[parentId],
-            [month]: newSum,
-          },
-        },
-      };
-    });
-  }; */
-  // TODO: This is in desperate need of a refactor
-  // Try to come up with a way to avoid nested state for budget
-  // PUT and POST methods can re-use the same code to update state
-  //
   const handleBlur = (event) => {
     const amount = parseInt(event.target.value);
     const month = event.target.dataset.month;
@@ -225,16 +205,16 @@ function MonthLines(props) {
    
   const monthLines = props.months.map((month, index) => {
     const budgetData = props.subcategorySumData?.[month.id] || {}
-    const entryAmount = parseInt(budgetData.budgetAmount) || 0;
+    const entryAmount = parseInt(props.budget?.[month.id]?.amount) || 0;
     const calc = parseInt(budgetData.transactionAmount) || 0;
     const diff = parseInt(budgetData.budgetSum || 0) + parseInt(budgetData.transactionSum || 0);
-    const entryId = 0;
+    const entryId = props.budget?.[month.id]?.id || 0;
     return (
       <React.Fragment key={index}>
         <td className="budget-entry">
           <input
             type="number"
-            value={entryAmount.toFixed(2)}
+            value={entryAmount}
             data-parentid={props.parentId}
             data-entry={entryId}
             data-month={month.id}
