@@ -63,6 +63,13 @@ class GroupList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner = self.request.user)
 
+class GroupDetail(generics.GenericAPIView, mixins.DestroyModelMixin):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
 class BucketList(generics.ListCreateAPIView):
     serializer_class = BucketSerializer
     def get_queryset(self):
@@ -71,6 +78,13 @@ class BucketList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         parent = Group(self.request.data['parent'])
         serializer.save(owner = self.request.user, parent = parent)
+
+class BucketDetail(generics.GenericAPIView, mixins.DestroyModelMixin):
+    queryset = Bucket.objects.all()
+    serializer_class = BucketSerializer
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 class AccountList(generics.ListCreateAPIView):
     serializer_class = AccountSerializer

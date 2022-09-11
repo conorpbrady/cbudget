@@ -4,7 +4,6 @@ import { useGetAccounts } from '../hooks/useGetAccounts';
 import { ConfirmationModal } from './ConfirmationModal';
 import { Button, Alert } from 'react-bootstrap';
 
-
 export default function Accounts() {
   const initInputs = { accountName: '', accountType: 0 };
 
@@ -31,13 +30,16 @@ export default function Accounts() {
     setShowConfirmationModal(false);
   };
   const submitDelete = (type, id) => {
-    submitDeleteAccount(id).then(resultMessage => {
-      setResultMessage(resultMessage);
-    })
-  .catch(errorMessage => {
-    setErrorMessage(errorMessage);
-  })
-    .finally(() => { setShowConfirmationModal(false); });
+    submitDeleteAccount(id)
+      .then((resultMessage) => {
+        setResultMessage(resultMessage);
+      })
+      .catch((errorMessage) => {
+        setErrorMessage(errorMessage);
+      })
+      .finally(() => {
+        setShowConfirmationModal(false);
+      });
   };
 
   const handleChange = useCallback(({ target: { name, value } }) =>
@@ -47,24 +49,30 @@ export default function Accounts() {
   const handleSubmit = (event) => {
     event.preventDefault();
     submitNewAccount(inputs);
-    setFetchToggle(prevState => !prevState);
+    setFetchToggle((prevState) => !prevState);
     setInputs(initInputs);
   };
 
   return (
     <div>
-    {
-      resultMessage
-      && 
-      <Alert 
-        variant="success" 
-        onClose={() => setResultMessage(null) }
-        dismissible
-      >
-        {resultMessage}
-      </Alert>
-    }
-    {errorMessage && <Alert variant="danger" onClose={() => setErrorMessage(null) } dismissible>{errorMessage}</Alert>}
+      {resultMessage && (
+        <Alert
+          variant="success"
+          onClose={() => setResultMessage(null)}
+          dismissible
+        >
+          {resultMessage}
+        </Alert>
+      )}
+      {errorMessage && (
+        <Alert
+          variant="danger"
+          onClose={() => setErrorMessage(null)}
+          dismissible
+        >
+          {errorMessage}
+        </Alert>
+      )}
       <table>
         <thead>
           <tr>
@@ -102,7 +110,8 @@ export default function Accounts() {
 
         <input type="submit" value="Submit" />
       </form>
-      <ConfirmationModal showModal={showConfirmationModal}
+      <ConfirmationModal
+        showModal={showConfirmationModal}
         confirmModal={submitDelete}
         hideModal={hideConfirmationModal}
         type={type}
@@ -122,7 +131,7 @@ function AccountList(props) {
         <td>
           <Button
             className="btn-outline-danger"
-            onClick={ () => props.showDeleteModal('Account', account.id) }
+            onClick={() => props.showDeleteModal('Account', account.id)}
           >
             x
           </Button>

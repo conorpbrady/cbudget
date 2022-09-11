@@ -4,7 +4,10 @@ from rest_framework_simplejwt import views as jwt_views
 prefix = 'api/'
 urlpatterns = [
         path(prefix + 'group', views.GroupList.as_view()),
+        path(prefix + 'group/<int:pk>', views.GroupDetail.as_view()),
         path(prefix + 'bucket', views.BucketList.as_view()),
+        path(prefix + 'bucket/<int:pk>', views.BucketDetail.as_view()),
+
         path(prefix + 'account', views.AccountList.as_view()),
         path(prefix + 'account/<int:pk>', views.AccountDetail.as_view()),
         path(prefix + 'monthlybudget', views.MonthlyBudgetList.as_view()),

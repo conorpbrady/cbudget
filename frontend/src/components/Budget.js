@@ -189,9 +189,9 @@ function HeadingLines(props) {
     const diff = parseInt(entrySum) + parseInt(transactionSum);
     return (
       <React.Fragment key={index}>
-        <td className="budget-entry cat-heading">{entrySum}</td>
-        <td className="budget-calc cat-heading">{transactionSum}</td>
-        <td className="budget-diff cat-heading">{diff}</td>
+        <td className="budget-entry cat-heading">{entrySum.toFixed(2)}</td>
+        <td className="budget-calc cat-heading">{transactionSum.toFixed(2)}</td>
+        <td className="budget-diff cat-heading">{diff.toFixed(2)}</td>
       </React.Fragment>
     );
   });
@@ -233,7 +233,7 @@ function MonthLines(props) {
         <td className="budget-entry">
           <input
             type="number"
-            value={entryAmount}
+            value={entryAmount.toFixed(2)}
             data-parentid={props.parentId}
             data-entry={entryId}
             data-month={month.id}
@@ -242,8 +242,8 @@ function MonthLines(props) {
             onBlur={props.handleBlur}
           />
         </td>
-        <td className="budget-calc">{calc}</td>
-        <td className="budget-diff">{diff}</td>
+        <td className="budget-calc">{calc.toFixed(2)}</td>
+        <td className="budget-diff">{diff.toFixed(2)}</td>
       </React.Fragment>
     );
   });

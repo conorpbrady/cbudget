@@ -1,10 +1,16 @@
 import React, { useEffect, useState, Fragment } from 'react';
+import { Alert, Button, Table } from 'react-bootstrap';
 import axiosInstance from '../api/axiosApi';
 import {
   useGetCategories,
   useGetFirstCategory,
 } from '../hooks/useGetCategories';
-import { submitNewGroup, submitNewBucket } from '../api/categoryApi';
+import {
+  submitNewGroup,
+  submitNewBucket,
+  submitDeleteCategory,
+} from '../api/categoryApi';
+import { ConfirmationModal } from './ConfirmationModal';
 
 export default function Categories() {
   const { categories, firstCategoryId } = useGetCategories();
@@ -12,6 +18,38 @@ export default function Categories() {
 
   const [newBucket, setNewBucket] = useState(initBucket);
   const [newGroup, setNewGroup] = useState('');
+
+  // TODO: This exact code is in Accounts component, find a way to lift it out and reuse
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [id, setId] = useState(null);
+  const [type, setType] = useState(null);
+  const [deleteMessage, setDeleteMessage] = useState(null);
+  const [resultMessage, setResultMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const displayConfirmationModal = (type, id) => {
+    setType(type);
+    setId(id);
+    setDeleteMessage(`Are you sure you want to delete ${type} ${id}`);
+    setShowConfirmationModal(true);
+  };
+
+  const hideConfirmationModal = () => {
+    setShowConfirmationModal(false);
+  };
+
+  const submitDelete = (type, id) => {
+    submitDeleteCategory(type, id)
+      .then((resultMessage) => {
+        setResultMessage(resultMessage);
+      })
+      .catch((errorMessage) => {
+        setErrorMessage(errorMessage);
+      })
+      .finally(() => {
+        setShowConfirmationModal(false);
+      });
+  };
 
   // TODO: This seems unnecessary - Due to state lifecycle / async calls, parent is not
   // getting updated with a valid category ID on the first render
@@ -41,16 +79,37 @@ export default function Categories() {
 
   return (
     <div>
-      <table>
+      {resultMessage && (
+        <Alert
+          variant="success"
+          onClose={() => setResultMessage(null)}
+          dismissible
+        >
+          {resultMessage}
+        </Alert>
+      )}
+      {errorMessage && (
+        <Alert
+          variant="danger"
+          onClose={() => setErrorMessage(null)}
+          dismissible
+        >
+          {errorMessage}
+        </Alert>
+      )}
+      <Table striped>
         <thead>
           <tr>
             <th>Category</th>
           </tr>
         </thead>
         <tbody>
-          <CategoryList categories={categories} />
+          <CategoryList
+            categories={categories}
+            showDeleteModal={displayConfirmationModal}
+          />
         </tbody>
-      </table>
+      </Table>
       <div>
         <Group
           newGroup={newGroup}
@@ -64,6 +123,14 @@ export default function Categories() {
           onBucketSubmit={handleBucketSubmit}
         />
       </div>
+      <ConfirmationModal
+        showModal={showConfirmationModal}
+        confirmModal={submitDelete}
+        hideModal={hideConfirmationModal}
+        type={type}
+        id={id}
+        message={deleteMessage}
+      />
     </div>
   );
 }
@@ -76,8 +143,19 @@ function CategoryList(props) {
           <td>
             <strong>{category.name}</strong>
           </td>
+          <td>
+            <Button
+              className="btn-outline-danger"
+              onClick={() => props.showDeleteModal('Category', category.id)}
+            >
+              x
+            </Button>
+          </td>
         </tr>
-        <SubCategoryList subcategories={category.bucket} />
+        <SubCategoryList
+          subcategories={category.bucket}
+          showDeleteModal={props.showDeleteModal}
+        />
       </Fragment>
     );
   });
@@ -89,6 +167,14 @@ function SubCategoryList(props) {
     return (
       <tr key={subcategory.id}>
         <td>{subcategory.name}</td>
+        <td>
+          <Button
+            className="btn-outline-danger"
+            onClick={() => props.showDeleteModal('Subcategory', subcategory.id)}
+          >
+            x
+          </Button>
+        </td>
       </tr>
     );
   });

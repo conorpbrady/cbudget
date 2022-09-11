@@ -22,3 +22,17 @@ export const submitNewBucket = (newBucket) => {
       console.log(error);
     });
 };
+
+export const submitDeleteCategory = (type, id) => {
+  const typeURL = type == 'Category' ? 'group' : 'bucket';
+  return new Promise((resolve, reject) => {
+    axiosInstance
+      .delete(`/api/${typeURL}/${id}`)
+      .then((response) => {
+        resolve('Successfully deleted');
+      })
+      .catch((error) => {
+        reject('Error deleting');
+      });
+  });
+};
