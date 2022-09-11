@@ -1,5 +1,5 @@
 from rest_framework.decorators import api_view
-from rest_framework import status, permissions, generics
+from rest_framework import status, permissions, generics, mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -79,6 +79,14 @@ class AccountList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner = self.request.user)
+
+class AccountDetail(generics.GenericAPIView, mixins.DestroyModelMixin):
+    queryset = Account.objects.all();
+    serializer_class = AccountSerializer
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
 
 class MonthlyBudgetList(generics.ListCreateAPIView):
     serializer_class = MonthlyBudgetSerializer

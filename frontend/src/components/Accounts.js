@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import { submitNewAccount } from '../api/accountsApi';
+import { submitNewAccount, submitDeleteAccount } from '../api/accountsApi';
 import { useGetAccounts } from '../hooks/useGetAccounts';
 import { ConfirmationModal } from './ConfirmationModal';
-import { Button } from 'react-bootstrap';
+import { Button, Alert } from 'react-bootstrap';
+
 
 export default function Accounts() {
   const initInputs = { accountName: '', accountType: 0 };
@@ -14,6 +15,8 @@ export default function Accounts() {
   const [id, setId] = useState(null);
   const [type, setType] = useState(null);
   const [deleteMessage, setDeleteMessage] = useState(null);
+  const [resultMessage, setResultMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const { accounts } = useGetAccounts(fetchToggle);
 
@@ -28,7 +31,13 @@ export default function Accounts() {
     setShowConfirmationModal(false);
   };
   const submitDelete = (type, id) => {
-    console.log('deleted');
+    submitDeleteAccount(id).then(resultMessage => {
+      setResultMessage(resultMessage);
+    })
+  .catch(errorMessage => {
+    setErrorMessage(errorMessage);
+  })
+    .finally(() => { setShowConfirmationModal(false); });
   };
 
   const handleChange = useCallback(({ target: { name, value } }) =>
@@ -44,6 +53,18 @@ export default function Accounts() {
 
   return (
     <div>
+    {
+      resultMessage
+      && 
+      <Alert 
+        variant="success" 
+        onClose={() => setResultMessage(null) }
+        dismissible
+      >
+        {resultMessage}
+      </Alert>
+    }
+    {errorMessage && <Alert variant="danger" onClose={() => setErrorMessage(null) } dismissible>{errorMessage}</Alert>}
       <table>
         <thead>
           <tr>
@@ -99,8 +120,11 @@ function AccountList(props) {
         <td>{account.accountName}</td>
         <td>{account.accountType}</td>
         <td>
-          <Button onClick={ () => props.showDeleteModal('Account', account.id) }>
-            Delete
+          <Button
+            className="btn-outline-danger"
+            onClick={ () => props.showDeleteModal('Account', account.id) }
+          >
+            x
           </Button>
         </td>
       </tr>

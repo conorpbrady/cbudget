@@ -6,6 +6,7 @@ urlpatterns = [
         path(prefix + 'group', views.GroupList.as_view()),
         path(prefix + 'bucket', views.BucketList.as_view()),
         path(prefix + 'account', views.AccountList.as_view()),
+        path(prefix + 'account/<int:pk>', views.AccountDetail.as_view()),
         path(prefix + 'monthlybudget', views.MonthlyBudgetList.as_view()),
         path(prefix + 'monthlybudget/entry/<int:id>', views.MonthlyBudgetUpdate.as_view()),
         path(prefix + 'monthlysum', views.MonthlySumList.as_view()),
