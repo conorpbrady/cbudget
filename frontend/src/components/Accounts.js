@@ -130,7 +130,7 @@ function AccountList(props) {
         <td>{account.accountType}</td>
         <td>
           <Button
-            className="btn-outline-danger"
+            variant="outline-danger"
             onClick={() => props.showDeleteModal('Account', account.id)}
           >
             x

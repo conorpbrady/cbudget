@@ -1,0 +1,112 @@
+import React, { useState, useCallback } from 'react';
+import Select from 'react-select';
+import Creatable from 'react-select/creatable';
+
+export default function TransactionForm(props) {
+  const mapToOptions = (arr) => {
+    return arr.map((obj) => {
+      return {
+        label: obj.name || obj.accountName,
+        value: obj.id,
+      };
+    });
+  };
+
+  const accOptions = mapToOptions(props.accounts);
+  const catOptions = mapToOptions(props.categories);
+  const payOptions = mapToOptions(props.payees);
+
+  const accSelectedOption = accOptions.filter((acc) => {
+    return acc.value === parseInt(props.details.account);
+  });
+  const catSelectedOption = catOptions.filter((cat) => {
+    return cat.value === parseInt(props.details.category);
+  });
+  const paySelectedOption = payOptions.filter((pay) => {
+    return pay.value === parseInt(props.details.payee);
+  });
+
+  return (
+    <>
+      <td>
+        <input
+          type="date"
+          name="ta_date"
+          value={props.details.ta_date}
+          onChange={props.handleChange}
+        />
+      </td>
+      <td>
+        <Select
+          name="account"
+          options={accOptions}
+          value={accSelectedOption}
+          onChange={props.handleSelectChange}
+        />
+      </td>
+      <td>
+        <Creatable
+          name="payee"
+          options={payOptions}
+          value={paySelectedOption}
+          onChange={props.handleSelectChange}
+          onCreateOption={props.handleCreate}
+        />
+      </td>
+      <td>
+        <Select
+          name="category"
+          options={catOptions}
+          value={catSelectedOption}
+          onChange={props.handleSelectChange}
+        />
+      </td>
+      <td>
+        <input
+          type="text"
+          name="note"
+          value={props.details.note}
+          onChange={props.handleChange}
+        />
+      </td>
+      <td>
+        <input
+          type="number"
+          name="in_amount"
+          value={props.details.in_amount}
+          onChange={props.handleChange}
+        />
+      </td>
+      <td>
+        <input
+          type="number"
+          name="out_amount"
+          value={props.details.out_amount}
+          onChange={props.handleChange}
+        />
+      </td>
+      <td>
+        <input
+          type="checkbox"
+          name="cleared"
+          value={props.details.cleared}
+          onChange={props.handleChange}
+        />
+      </td>
+      <td>
+        <input
+          type="checkbox"
+          name="reconciled"
+          value={props.details.reconciled}
+          onChange={props.handleChange}
+        />
+      </td>
+      <td>
+        <button onClick={props.handleCancel}>x</button>
+      </td>
+      <td>
+        <button onClick={props.handleSubmit}>+</button>
+      </td>
+    </>
+  );
+}

@@ -81,7 +81,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transaction
-        fields = ('ta_date', 'ta_account', 'ta_payee', 'ta_bucket', \
+        fields = ('id', 'ta_date', 'ta_account', 'ta_payee', 'ta_bucket', \
                 'note', 'in_amount', 'out_amount', 'cleared', 'reconciled')
 
 class CategorySerializer(serializers.ModelSerializer):

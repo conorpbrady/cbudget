@@ -1,8 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useGetTransactionInfo } from '../hooks/useGetTransactionInfo';
+import TransactionForm from './TransactionForm';
 import { submitNewTransaction, submitNewPayee } from '../api/transactionApi';
-import Select from 'react-select';
-import Creatable from 'react-select/creatable';
 import { Table, Alert, Button } from 'react-bootstrap';
 
 export default function Transaction() {
@@ -18,21 +17,20 @@ export default function Transaction() {
     reconciled: false,
   };
 
+  const [transactionToEdit, setTransactionToEdit] = useState(null);
+
   const [newTransaction, setNewTransaction] = useState(initTransaction);
   const [fetchToggle, setFetchToggle] = useState(false);
   const { transactions, accounts, categories, payees } =
     useGetTransactionInfo(fetchToggle);
 
+  const handleMakeTransactionEditable = (transactionId) => {
+    setTransactionToEdit(transactionId);
+  };
+
   const handleChange = useCallback(({ target: { name, value } }) =>
     setNewTransaction((prevState) => ({ ...prevState, [name]: value }), [])
   );
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    submitNewTransaction(newTransaction);
-    setNewTransaction(initTransaction);
-    setFetchToggle((prevState) => !prevState);
-  };
 
   const handleSelectChange = (selectedOption, action) => {
     setNewTransaction((prevState) => ({
@@ -50,30 +48,16 @@ export default function Transaction() {
       payee: newPayeeId,
     }));
   };
-
-  //TODO: Refactor - this could be better done by reworking data structure
-  const mapToOptions = (arr) => {
-    return arr.map((obj) => {
-      return {
-        label: obj.name || obj.accountName,
-        value: obj.id,
-      };
-    });
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    submitNewTransaction(newTransaction);
+    setNewTransaction(initTransaction);
+    setFetchToggle((prevState) => !prevState);
   };
 
-  const accOptions = mapToOptions(accounts);
-  const catOptions = mapToOptions(categories);
-  const payOptions = mapToOptions(payees);
-
-  const accSelectedOption = accOptions.filter((acc) => {
-    return acc.value === parseInt(newTransaction.account);
-  });
-  const catSelectedOption = catOptions.filter((cat) => {
-    return cat.value === parseInt(newTransaction.category);
-  });
-  const paySelectedOption = payOptions.filter((pay) => {
-    return pay.value === parseInt(newTransaction.payee);
-  });
+  const handleCancel = () => {
+    setTransactionToEdit(null);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -92,85 +76,20 @@ export default function Transaction() {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>
-              <input
-                type="date"
-                name="ta_date"
-                value={newTransaction.ta_date}
-                onChange={handleChange}
-              />
-            </td>
-            <td>
-              <Select
-                name="account"
-                options={accOptions}
-                value={accSelectedOption}
-                onChange={handleSelectChange}
-              />
-            </td>
-            <td>
-              <Creatable
-                name="payee"
-                options={payOptions}
-                value={paySelectedOption}
-                onChange={handleSelectChange}
-                onCreateOption={handleCreate}
-              />
-            </td>
-            <td>
-              <Select
-                name="category"
-                options={catOptions}
-                value={catSelectedOption}
-                onChange={handleSelectChange}
-              />
-            </td>
-            <td>
-              <input
-                type="text"
-                name="note"
-                value={newTransaction.note}
-                onChange={handleChange}
-              />
-            </td>
-            <td>
-              <input
-                type="number"
-                name="in_amount"
-                value={newTransaction.in_amount}
-                onChange={handleChange}
-              />
-            </td>
-            <td>
-              <input
-                type="number"
-                name="out_amount"
-                value={newTransaction.out_amount}
-                onChange={handleChange}
-              />
-            </td>
-            <td>
-              <input
-                type="checkbox"
-                name="cleared"
-                value={newTransaction.cleared}
-                onChange={handleChange}
-              />
-            </td>
-            <td>
-              <input
-                type="checkbox"
-                name="reconciled"
-                value={newTransaction.reconciled}
-                onChange={handleChange}
-              />
-            </td>
-            <td>
-              <input type="submit" value="+" />
-            </td>
-          </tr>
-          <TransactionList transactions={transactions} />
+          <TransactionList
+            transactions={transactions}
+            transactionToEdit={transactionToEdit}
+            handleMakeTransactionEditable={handleMakeTransactionEditable}
+            accounts={accounts}
+            categories={categories}
+            payees={payees}
+            handleChange={handleChange}
+            handleCreate={handleCreate}
+            handleSelectChange={handleSelectChange}
+            newTransaction={newTransaction}
+            handleSubmit={handleSubmit}
+            handleCancel={handleCancel}
+          />
         </tbody>
       </Table>
     </form>
@@ -178,21 +97,65 @@ export default function Transaction() {
 }
 
 function TransactionList(props) {
+  const showAddTransactionRow = props.transactionToEdit === null;
   const transactionList = props.transactions.map((trn, index) => {
     return (
-      <tr key={index}>
-        <td>{trn.ta_date}</td>
-        <td>{trn.ta_account}</td>
-        <td>{trn.ta_payee}</td>
-        <td>{trn.ta_bucket}</td>
-        <td>{trn.note}</td>
-        <td>{trn.in_amount}</td>
-        <td>{trn.out_amount}</td>
-        <td>{trn.cleared}</td>
-        <td>{trn.reconciled}</td>
+      <tr
+        key={index}
+        onClick={() => props.handleMakeTransactionEditable(trn.id)}
+      >
+        {trn.id === props.transactionToEdit ? (
+          <TransactionForm
+            details={trn}
+            accounts={props.accounts}
+            categories={props.categories}
+            payees={props.payees}
+            handleChange={props.handleChange}
+            handleCreate={props.handleCreate}
+            handleSeletChange={props.handleSelectChange}
+            handleSubmit={props.handleSubmit}
+            handleCancel={props.handleCancel}
+          />
+        ) : (
+          <DisplayTransaction details={trn} />
+        )}
       </tr>
     );
   });
 
-  return transactionList;
+  return (
+    <>
+      {showAddTransactionRow && (
+        <tr>
+          <TransactionForm
+            details={props.newTransaction}
+            accounts={props.accounts}
+            categories={props.categories}
+            payees={props.payees}
+            handlechange={props.handleChange}
+            handleCreate={props.handeCreate}
+            handleSelectChange={props.handleSelectChange}
+            handleCancel={props.handleCancel}
+          />
+        </tr>
+      )}
+      {transactionList};
+    </>
+  );
+}
+
+function DisplayTransaction(props) {
+  return (
+    <>
+      <td>{props.details.ta_date}</td>
+      <td>{props.details.ta_account}</td>
+      <td>{props.details.ta_payee}</td>
+      <td>{props.details.ta_bucket}</td>
+      <td>{props.details.note}</td>
+      <td>{props.details.in_amount}</td>
+      <td>{props.details.out_amount}</td>
+      <td>{props.details.cleared}</td>
+      <td>{props.details.reconciled}</td>
+    </>
+  );
 }
