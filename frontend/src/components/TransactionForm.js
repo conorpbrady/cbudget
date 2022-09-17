@@ -12,19 +12,30 @@ export default function TransactionForm(props) {
     });
   };
 
+  const getSelectedOption = (arrOptions, identifier) => {
+    if (isNaN(identifier)) {
+      return arrOptions.filter((arr) => {
+        return arr.label === identifier;
+      });
+    } else {
+      return arrOptions.filter((arr) => {
+        return arr.value === parseInt(identifier);
+      });
+    }
+  };
   const accOptions = mapToOptions(props.accounts);
   const catOptions = mapToOptions(props.categories);
   const payOptions = mapToOptions(props.payees);
 
-  const accSelectedOption = accOptions.filter((acc) => {
-    return acc.value === parseInt(props.details.account);
-  });
-  const catSelectedOption = catOptions.filter((cat) => {
-    return cat.value === parseInt(props.details.category);
-  });
-  const paySelectedOption = payOptions.filter((pay) => {
-    return pay.value === parseInt(props.details.payee);
-  });
+  const accSelectedOption = getSelectedOption(
+    accOptions,
+    props.details.account_id
+  );
+  const catSelectedOption = getSelectedOption(
+    catOptions,
+    props.details.category_id
+  );
+  const paySelectedOption = getSelectedOption(payOptions, props.details.payee_id);
 
   return (
     <>
@@ -43,7 +54,7 @@ export default function TransactionForm(props) {
           options={accOptions}
           value={accSelectedOption}
           onChange={props.handleSelectChange}
-          disabled={props.transactionBeingEdited}
+          isDisabled={props.transactionBeingEdited}
         />
       </td>
       <td>
@@ -53,7 +64,7 @@ export default function TransactionForm(props) {
           value={paySelectedOption}
           onChange={props.handleSelectChange}
           onCreateOption={props.handleCreate}
-          disabled={props.transactionBeingEdited}
+          isDisabled={props.transactionBeingEdited}
         />
       </td>
       <td>
@@ -62,7 +73,7 @@ export default function TransactionForm(props) {
           options={catOptions}
           value={catSelectedOption}
           onChange={props.handleSelectChange}
-          disabled={props.transactionBeingEdited}
+          isDisabled={props.transactionBeingEdited}
         />
       </td>
       <td>

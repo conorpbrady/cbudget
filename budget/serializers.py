@@ -75,13 +75,17 @@ class PayeeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'linked_bucket')
 
 class TransactionSerializer(serializers.ModelSerializer):
-    ta_account = serializers.StringRelatedField(source = 'ta_account.name')
-    ta_payee = serializers.StringRelatedField(source = 'ta_payee.name')
-    ta_bucket = serializers.StringRelatedField(source = 'ta_bucket.name')
+    account = serializers.StringRelatedField(source = 'ta_account.name')
+    account_id = serializers.StringRelatedField(source ='ta_account.id')
+    payee = serializers.StringRelatedField(source = 'ta_payee.name')
+    payee_id = serializers.StringRelatedField(source = 'ta_payee.id')
+    category = serializers.StringRelatedField(source = 'ta_bucket.name')
+    category_id = serializers.StringRelatedField(source = 'ta_bucket.id')
 
     class Meta:
         model = Transaction
-        fields = ('id', 'ta_date', 'ta_account', 'ta_payee', 'ta_bucket', \
+        fields = ('id', 'ta_date', 'account', 'account_id', 'payee', \
+                'payee_id', 'category', 'category_id', \
                 'note', 'in_amount', 'out_amount', 'cleared', 'reconciled')
 
 class CategorySerializer(serializers.ModelSerializer):

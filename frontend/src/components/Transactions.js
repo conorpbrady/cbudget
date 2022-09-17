@@ -1,15 +1,22 @@
 import React, { useState, useCallback } from 'react';
 import { useGetTransactionInfo } from '../hooks/useGetTransactionInfo';
 import TransactionForm from './TransactionForm';
-import { submitNewTransaction, submitNewPayee } from '../api/transactionApi';
+import {
+  submitEditTransaction,
+  submitNewTransaction,
+  submitNewPayee,
+} from '../api/transactionApi';
 import { Table, Alert, Button } from 'react-bootstrap';
 
 export default function Transaction() {
   const initTransaction = {
     ta_date: '',
     account: '',
+    account_id: '',
     payee: '',
+    payee_id: '',
     category: '',
+    category_id: '',
     note: '',
     in_amount: 0,
     out_amount: 0,
@@ -20,31 +27,44 @@ export default function Transaction() {
   const [transactionToEdit, setTransactionToEdit] = useState(0);
 
   const [newTransaction, setNewTransaction] = useState(initTransaction);
+  const [editedTransaction, setEditedTransaction] = useState(initTransaction);
   const [fetchToggle, setFetchToggle] = useState(false);
   const { transactions, accounts, categories, payees } =
     useGetTransactionInfo(fetchToggle);
 
-  const handleMakeTransactionEditable = (transactionId) => {
+  const handleMakeTransactionEditable = (transactionObject) => {
     if (transactionToEdit != 0) {
       return;
     }
-    setTransactionToEdit(transactionId);
+    setTransactionToEdit(transactionObject.id);
+    setEditedTransaction(transactionObject);
   };
 
   const handleChange = useCallback(({ target: { name, value } }) => {
-    console.log('hi');
     setNewTransaction((prevState) => ({ ...prevState, [name]: value }), []);
+  });
+
+  const handleEditChange = useCallback(({ target: { name, value } }) => {
+    setEditedTransaction((prevState) => ({ ...prevState, [name]: value }), []);
   });
 
   const handleSelectChange = (selectedOption, action) => {
     setNewTransaction((prevState) => ({
       ...prevState,
-      [action.name]: `${selectedOption.value}`,
+      [`${action.name}_id`]: `${selectedOption.value}`,
+      [action.name]: `${selectedOption.label}`,
+    }));
+  };
+
+  const handleSelectEditChange = (selectedOption, action) => {
+    setEditedTransaction((prevState) => ({
+      ...prevState,
+      [`${action.name}_id`]: `${selectedOption.value}`,
+      [action.name]: `${selectedOption.label}`,
     }));
   };
 
   const handleCreate = (selectedOption) => {
-    console.log(selectedOption);
     const newPayee = { name: selectedOption };
     const { newPayeeId } = submitNewPayee(newPayee);
     setNewTransaction((prevState) => ({
@@ -52,24 +72,26 @@ export default function Transaction() {
       payee: newPayeeId,
     }));
   };
-  const handleSubmit = (event, editedTransaction) => {
+  const handleSubmit = (event, isEditTransaction) => {
     event.preventDefault();
 
-    if (editedTransaction) {
-      console.log('do something to edit');
+    if (isEditTransaction) {
+      submitEditTransaction(editedTransaction);
+      setTransactionToEdit(0);
     } else {
       submitNewTransaction(newTransaction);
       setNewTransaction(initTransaction);
-      setFetchToggle((prevState) => !prevState);
     }
+    setFetchToggle((prevState) => !prevState);
   };
 
   const handleCancel = () => {
     setTransactionToEdit(0);
+    setEditedTransaction(initTransaction);
   };
 
   return (
-    <form onSubmit={(e) => handleSubmit(e, setTransactionToEdit != 0)}>
+    <form onSubmit={(e) => handleSubmit(e, transactionToEdit != 0)}>
       <Table striped>
         <thead>
           <tr>
@@ -95,9 +117,12 @@ export default function Transaction() {
             handleChange={handleChange}
             handleCreate={handleCreate}
             handleSelectChange={handleSelectChange}
+            handleSelectEditChange={handleSelectEditChange}
             newTransaction={newTransaction}
             handleSubmit={handleSubmit}
             handleCancel={handleCancel}
+            handleEditChange={handleEditChange}
+            editObject={editedTransaction}
           />
         </tbody>
       </Table>
@@ -109,19 +134,16 @@ function TransactionList(props) {
   const showAddTransactionRow = props.transactionToEdit === 0;
   const transactionList = props.transactions.map((trn, index) => {
     return (
-      <tr
-        key={index}
-        onClick={() => props.handleMakeTransactionEditable(trn.id)}
-      >
+      <tr key={index} onClick={() => props.handleMakeTransactionEditable(trn)}>
         {trn.id === props.transactionToEdit ? (
           <TransactionForm
-            details={trn}
+            details={props.editObject}
             accounts={props.accounts}
             categories={props.categories}
             payees={props.payees}
-            handleChange={props.handleChange}
+            handleChange={props.handleEditChange}
             handleCreate={props.handleCreate}
-            handleSeletChange={props.handleSelectChange}
+            handleSelectChange={props.handleSelectEditChange}
             handleSubmit={props.handleSubmit}
             handleCancel={props.handleCancel}
           />
@@ -156,9 +178,9 @@ function DisplayTransaction(props) {
   return (
     <>
       <td>{props.details.ta_date}</td>
-      <td>{props.details.ta_account}</td>
-      <td>{props.details.ta_payee}</td>
-      <td>{props.details.ta_bucket}</td>
+      <td>{props.details.account}</td>
+      <td>{props.details.payee}</td>
+      <td>{props.details.category}</td>
       <td>{props.details.note}</td>
       <td>{props.details.in_amount}</td>
       <td>{props.details.out_amount}</td>

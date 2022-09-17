@@ -133,9 +133,31 @@ class TransactionList(generics.ListCreateAPIView):
         return Transaction.objects.filter(owner = self.request.user)
 
     def perform_create(self, serializer):
-        ta_account = Account.objects.get(id = self.request.data['account'])
-        ta_payee = Payee.objects.get(id = self.request.data['payee'])
-        ta_bucket = Bucket.objects.get(id = self.request.data['category'])
+        ta_account = Account.objects.get(id = self.request.data['account_id'])
+        ta_payee = Payee.objects.get(id = self.request.data['payee_id'])
+        ta_bucket = Bucket.objects.get(id = self.request.data['category_id'])
+        query_date = self.request.data['ta_date']
+
+        month = Month.objects.get(start_date__lte = query_date, end_date__gte = query_date)
+
+        serializer.save(
+                owner = self.request.user,
+                month = month,
+                ta_account = ta_account,
+                ta_payee = ta_payee,
+                ta_bucket = ta_bucket
+                )
+
+class TransactionDetail(generics.UpdateAPIView):
+    serializer_class = TransactionSerializer
+    lookup_field = 'id'
+    def get_queryset(self):
+        return Transaction.objects.filter(id = self.request.data['id'])
+
+    def perform_update(self, serializer):
+        ta_account = Account.objects.get(id = self.request.data['account_id'])
+        ta_payee = Payee.objects.get(id = self.request.data['payee_id'])
+        ta_bucket = Bucket.objects.get(id = self.request.data['category_id'])
         query_date = self.request.data['ta_date']
 
         month = Month.objects.get(start_date__lte = query_date, end_date__gte = query_date)
