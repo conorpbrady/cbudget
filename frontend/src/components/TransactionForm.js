@@ -1,6 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import Select from 'react-select';
 import Creatable from 'react-select/creatable';
+import { Button } from 'react-bootstrap';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faCheck,
+  faTrash,
+  faLeftLong,
+} from '@fortawesome/free-solid-svg-icons';
 
 export default function TransactionForm(props) {
   const mapToOptions = (arr) => {
@@ -35,7 +43,10 @@ export default function TransactionForm(props) {
     catOptions,
     props.details.category_id
   );
-  const paySelectedOption = getSelectedOption(payOptions, props.details.payee_id);
+  const paySelectedOption = getSelectedOption(
+    payOptions,
+    props.details.payee_id
+  );
 
   return (
     <>
@@ -126,12 +137,19 @@ export default function TransactionForm(props) {
       ) : (
         <>
           <td>
-            <button type="button" onClick={props.handleCancel}>
-              x
-            </button>
+            <Button variant="outline-danger">
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
           </td>
           <td>
-            <input type="submit" value="+" />
+            <Button variant="outline-warning" onClick={props.handleCancel}>
+              <FontAwesomeIcon icon={faLeftLong} />
+            </Button>
+          </td>
+          <td>
+            <Button type="submit" variant="outline-success">
+              <FontAwesomeIcon icon={faCheck} />
+            </Button>
           </td>
         </>
       )}

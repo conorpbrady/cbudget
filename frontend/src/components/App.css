@@ -1,4 +1,4 @@
-/* 
+/*
  * dark blue = #212333
  * mid buule = 6C7A9E
  * accent blue = 4477B4
@@ -39,4 +39,8 @@ nav a:visited {
 
 main {
   padding: 1em;
+}
+
+.bi {
+  font-family: bootstrap-icons;
 }

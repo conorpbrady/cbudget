@@ -4,6 +4,7 @@ import App from './components/App';
 import { BrowserRouter } from 'react-router-dom';
 
 import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
