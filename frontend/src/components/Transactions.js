@@ -17,7 +17,7 @@ export default function Transaction() {
     reconciled: false,
   };
 
-  const [transactionToEdit, setTransactionToEdit] = useState(null);
+  const [transactionToEdit, setTransactionToEdit] = useState(0);
 
   const [newTransaction, setNewTransaction] = useState(initTransaction);
   const [fetchToggle, setFetchToggle] = useState(false);
@@ -25,12 +25,16 @@ export default function Transaction() {
     useGetTransactionInfo(fetchToggle);
 
   const handleMakeTransactionEditable = (transactionId) => {
+    if (transactionToEdit != 0) {
+      return;
+    }
     setTransactionToEdit(transactionId);
   };
 
-  const handleChange = useCallback(({ target: { name, value } }) =>
-    setNewTransaction((prevState) => ({ ...prevState, [name]: value }), [])
-  );
+  const handleChange = useCallback(({ target: { name, value } }) => {
+    console.log('hi');
+    setNewTransaction((prevState) => ({ ...prevState, [name]: value }), []);
+  });
 
   const handleSelectChange = (selectedOption, action) => {
     setNewTransaction((prevState) => ({
@@ -48,19 +52,24 @@ export default function Transaction() {
       payee: newPayeeId,
     }));
   };
-  const handleSubmit = (event) => {
+  const handleSubmit = (event, editedTransaction) => {
     event.preventDefault();
-    submitNewTransaction(newTransaction);
-    setNewTransaction(initTransaction);
-    setFetchToggle((prevState) => !prevState);
+
+    if (editedTransaction) {
+      console.log('do something to edit');
+    } else {
+      submitNewTransaction(newTransaction);
+      setNewTransaction(initTransaction);
+      setFetchToggle((prevState) => !prevState);
+    }
   };
 
   const handleCancel = () => {
-    setTransactionToEdit(null);
+    setTransactionToEdit(0);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={(e) => handleSubmit(e, setTransactionToEdit != 0)}>
       <Table striped>
         <thead>
           <tr>
@@ -97,7 +106,7 @@ export default function Transaction() {
 }
 
 function TransactionList(props) {
-  const showAddTransactionRow = props.transactionToEdit === null;
+  const showAddTransactionRow = props.transactionToEdit === 0;
   const transactionList = props.transactions.map((trn, index) => {
     return (
       <tr
@@ -125,21 +134,20 @@ function TransactionList(props) {
 
   return (
     <>
-      {showAddTransactionRow && (
-        <tr>
-          <TransactionForm
-            details={props.newTransaction}
-            accounts={props.accounts}
-            categories={props.categories}
-            payees={props.payees}
-            handlechange={props.handleChange}
-            handleCreate={props.handeCreate}
-            handleSelectChange={props.handleSelectChange}
-            handleCancel={props.handleCancel}
-          />
-        </tr>
-      )}
-      {transactionList};
+      <tr>
+        <TransactionForm
+          details={props.newTransaction}
+          accounts={props.accounts}
+          categories={props.categories}
+          payees={props.payees}
+          handleChange={props.handleChange}
+          handleCreate={props.handleCreate}
+          handleSelectChange={props.handleSelectChange}
+          handleCancel={props.handleCancel}
+          transactionBeingEdited={!showAddTransactionRow}
+        />
+      </tr>
+      {transactionList}
     </>
   );
 }

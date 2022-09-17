@@ -34,6 +34,7 @@ export default function TransactionForm(props) {
           name="ta_date"
           value={props.details.ta_date}
           onChange={props.handleChange}
+          disabled={props.transactionBeingEdited}
         />
       </td>
       <td>
@@ -42,6 +43,7 @@ export default function TransactionForm(props) {
           options={accOptions}
           value={accSelectedOption}
           onChange={props.handleSelectChange}
+          disabled={props.transactionBeingEdited}
         />
       </td>
       <td>
@@ -51,6 +53,7 @@ export default function TransactionForm(props) {
           value={paySelectedOption}
           onChange={props.handleSelectChange}
           onCreateOption={props.handleCreate}
+          disabled={props.transactionBeingEdited}
         />
       </td>
       <td>
@@ -59,6 +62,7 @@ export default function TransactionForm(props) {
           options={catOptions}
           value={catSelectedOption}
           onChange={props.handleSelectChange}
+          disabled={props.transactionBeingEdited}
         />
       </td>
       <td>
@@ -67,6 +71,7 @@ export default function TransactionForm(props) {
           name="note"
           value={props.details.note}
           onChange={props.handleChange}
+          disabled={props.transactionBeingEdited}
         />
       </td>
       <td>
@@ -75,6 +80,7 @@ export default function TransactionForm(props) {
           name="in_amount"
           value={props.details.in_amount}
           onChange={props.handleChange}
+          disabled={props.transactionBeingEdited}
         />
       </td>
       <td>
@@ -83,6 +89,7 @@ export default function TransactionForm(props) {
           name="out_amount"
           value={props.details.out_amount}
           onChange={props.handleChange}
+          disabled={props.transactionBeingEdited}
         />
       </td>
       <td>
@@ -91,6 +98,7 @@ export default function TransactionForm(props) {
           name="cleared"
           value={props.details.cleared}
           onChange={props.handleChange}
+          disabled={props.transactionBeingEdited}
         />
       </td>
       <td>
@@ -99,14 +107,23 @@ export default function TransactionForm(props) {
           name="reconciled"
           value={props.details.reconciled}
           onChange={props.handleChange}
+          disabled={props.transactionBeingEdited}
         />
       </td>
-      <td>
-        <button onClick={props.handleCancel}>x</button>
-      </td>
-      <td>
-        <button onClick={props.handleSubmit}>+</button>
-      </td>
+      {props.transactionBeingEdited ? (
+        <></>
+      ) : (
+        <>
+          <td>
+            <button type="button" onClick={props.handleCancel}>
+              x
+            </button>
+          </td>
+          <td>
+            <input type="submit" value="+" />
+          </td>
+        </>
+      )}
     </>
   );
 }
