@@ -202,25 +202,32 @@ class TransactionSumList(generics.ListAPIView):
 
 class CumSumList(viewsets.ViewSet):
     query_string = """
-    WITH MonthSums AS (
-	    SELECT mb.month_id as month,
-    	mb.category_id as category,
-        SUM(mb.Amount) as budgetAmount,
-        SUM(t.in_amount) - SUM(t.out_amount) as transactionAmount
-    	FROM budget_MonthlyBudget mb
-        LEFT JOIN budget_month as m ON m.id = mb.month_id
-        LEFT JOIN budget_bucket as c ON c.id = mb.category_id
-        LEFT JOIN budget_transaction as t ON t.month_id = m.id AND t.ta_bucket_id = c.id
-    	GROUP BY mb.month_id, mb.category_id
-    )
-    SELECT ms1.month,
-            ms1.category,
-            ms1.budgetAmount as budgetAmount,
-            ms1.transactionAmount as transactionAmount,
-            SUM(ms2.BudgetAmount) as budgetSum,
-      SUM(ms2.transactionAmount) as transactionSum FROM MonthSums ms1
-    INNER JOIN MonthSums ms2 on ms1.Month >= ms2.Month AND ms1.Category = ms2.Category
-    GROUP BY ms1.Month, ms1.Category
+        WITH GroupedTransactions AS 
+        (
+            SELECT month_id, ta_bucket_id, SUM(in_amount) AS Income, SUM(out_amount) AS Expenditures
+            FROM budget_transaction GROUP BY month_id, ta_bucket_id
+        ), 
+        MonthSums AS 
+        (
+            SELECT mb.month_id as month,
+            mb.category_id as category,
+            SUM(mb.Amount) as budgetAmount,
+            t.Income - t.Expenditures as transactionAmount
+            FROM budget_MonthlyBudget mb
+            LEFT JOIN budget_month as m ON m.id = mb.month_id
+            LEFT JOIN budget_bucket as c ON c.id = mb.category_id
+            LEFT JOIN GroupedTransactions as t ON t.month_id = m.id AND t.ta_bucket_id = c.id
+            GROUP BY mb.month_id, mb.category_id
+        )
+
+        SELECT ms1.month,
+        ms1.category,
+        ms1.budgetAmount as budgetAmount,
+        ms1.transactionAmount as transactionAmount,
+        SUM(ms2.BudgetAmount) as budgetSum,
+        SUM(ms2.transactionAmount) as transactionSum FROM MonthSums ms1
+        INNER JOIN MonthSums ms2 on ms1.Month >= ms2.Month AND ms1.Category = ms2.Category
+        GROUP BY ms1.Month, ms1.Category
     """
 
     def list(self, request):

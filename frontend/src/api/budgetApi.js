@@ -11,7 +11,7 @@ export const createEntryObject = (data) => {
 };
 
 export function submitBudgetEntry(newBudgetEntry, existingId) {
-  if (existingId === 0 || existingId === undefined) {
+  if (existingId === 0 || existingId === '0' || existingId === undefined) {
     return new Promise((resolve) => {
       axiosInstance
         .post('/api/monthlybudget', newBudgetEntry)
