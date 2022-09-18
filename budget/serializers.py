@@ -124,10 +124,12 @@ class CumSumSerializer(serializers.Serializer):
     category = BucketSerializer()
     budgetAmount = serializers.DecimalField(decimal_places = 2, max_digits = 11)
     budgetSum = serializers.DecimalField(decimal_places = 2, max_digits = 11)
+    income = serializers.DecimalField(decimal_places = 2, max_digits = 11)
+    expenditures = serializers.DecimalField(decimal_places = 2, max_digits = 11)
     transactionAmount = serializers.DecimalField(decimal_places = 2, max_digits = 11)
     transactionSum = serializers.DecimalField(decimal_places = 2, max_digits = 11)
     class Meta:
-        fields = ('month', 'category', 'budgetAmount', 'transactionAmount', 'budgetSum', 'transactionSum')
+        fields = ('month', 'category', 'budgetAmount', 'transactionAmount', 'income', 'expenditures', 'budgetSum', 'transactionSum')
 
     def to_representation(self, instance):
         instance['month'] = Month.objects.get(id = instance['month'])

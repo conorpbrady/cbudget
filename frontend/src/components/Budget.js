@@ -14,7 +14,7 @@ export default function Budget() {
   const { categories } = useGetCategories();
   const { months } = useGetMonths();
   const { budget, setBudget } = useGetBudget(months);
-  
+
   const [fetchSumToggle, setFetchSumToggle] = useState(true);
 
   //const { budgetSum } = useGetBudgetSum(months, fetchSumToggle);
@@ -79,12 +79,21 @@ export default function Budget() {
     setFetchSumToggle((prevState) => !prevState);
   };
 
-  const monthIncome = 0;
-  const monthSpend = 0;
-  const monthDiff = monthIncome - monthSpend;
+  const reduceSumData = (sumObj, keyToFilter) => {
+    let output = {};
+    if (sumObj === undefined) return output;
+    Object.keys(sumObj).map((monthKey) => {
+      output = {
+        ...output,
+        [monthKey]: sumObj[monthKey][keyToFilter],
+      };
+    });
+    return output;
+  };
+
   return (
     <div className="budget-container">
-      <Table size='sm' className="budget-table">
+      <Table size="sm" className="budget-table">
         <thead>
           <tr>
             <th>Categories</th>
@@ -99,17 +108,17 @@ export default function Budget() {
           <MonthlySummaryLine
             months={months}
             message="Income: "
-            value={monthIncome}
+            values={reduceSumData(sumData.months, 'income')}
           />
           <MonthlySummaryLine
             months={months}
-            message="Spent: "
-            value={monthSpend}
+            message="Budgeted: "
+            values={reduceSumData(sumData.months, 'budgetAmount')}
           />
           <MonthlySummaryLine
             months={months}
             message="Difference: "
-            value={monthDiff}
+            values={reduceSumData(sumData.months, 'leftToBudget')}
             firstCell="Categories"
           />
           <tr></tr>
@@ -136,7 +145,6 @@ export default function Budget() {
                   parentId={category.id}
                   handleChange={handleChange}
                   handleBlur={handleBlur}
-
                 />
               </React.Fragment>
             );
@@ -152,10 +160,14 @@ function MonthlySummaryLine(props) {
     <tr>
       <td className="budget-cat">{props.firstCell}</td>
       {props.months.map((month) => {
+        const value = parseInt(props.values?.[month.id]) || 0;
         return (
-          <td className="monthly-summary" key={month.id} colSpan="3">
-            {props.message}
-          </td>
+          <React.Fragment key={month.id}>
+            <td className="monthly-summary" colSpan="2">
+              {props.message}
+            </td>
+            <td className="monthly-summary">{value.toFixed(2)}</td>
+          </React.Fragment>
         );
       })}
     </tr>
@@ -166,7 +178,8 @@ function HeadingLines(props) {
   const months = props.months || [];
   const headingLines = months.map((month, index) => {
     const entrySum = props.categorySumData.months?.[month.id]?.budgetTotal || 0;
-    const transactionSum = props.categorySumData.months?.[month.id]?.transactionTotal || 0;
+    const transactionSum =
+      props.categorySumData.months?.[month.id]?.transactionTotal || 0;
     const diff = parseInt(entrySum) + parseInt(transactionSum);
     return (
       <React.Fragment key={index}>
@@ -191,7 +204,9 @@ function BudgetLines(props) {
           months={months}
           parentId={props.parentId}
           subcategoryId={subcategory.id}
-          subcategorySumData={props.categorySumData.subcategories?.[subcategory.id]}
+          subcategorySumData={
+            props.categorySumData.subcategories?.[subcategory.id]
+          }
           handleChange={props.handleChange}
           handleBlur={props.handleBlur}
         />
@@ -202,12 +217,13 @@ function BudgetLines(props) {
 }
 
 function MonthLines(props) {
-   
   const monthLines = props.months.map((month, index) => {
-    const budgetData = props.subcategorySumData?.[month.id] || {}
+    const budgetData = props.subcategorySumData?.[month.id] || {};
     const entryAmount = parseInt(props.budget?.[month.id]?.amount) || 0;
     const calc = parseInt(budgetData.transactionAmount) || 0;
-    const diff = parseInt(budgetData.budgetSum || 0) + parseInt(budgetData.transactionSum || 0);
+    const diff =
+      parseInt(budgetData.budgetSum || 0) +
+      parseInt(budgetData.transactionSum || 0);
     const entryId = props.budget?.[month.id]?.id || 0;
     return (
       <React.Fragment key={index}>

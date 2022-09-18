@@ -212,6 +212,8 @@ class CumSumList(viewsets.ViewSet):
             SELECT mb.month_id as month,
             mb.category_id as category,
             SUM(mb.Amount) as budgetAmount,
+            t.Income as income,
+            t.Expenditures as expenditures,
             t.Income - t.Expenditures as transactionAmount
             FROM budget_MonthlyBudget mb
             LEFT JOIN budget_month as m ON m.id = mb.month_id
@@ -223,6 +225,8 @@ class CumSumList(viewsets.ViewSet):
         SELECT ms1.month,
         ms1.category,
         ms1.budgetAmount as budgetAmount,
+        ms1.income as income,
+        ms1.expenditures as expenditures,
         ms1.transactionAmount as transactionAmount,
         SUM(ms2.BudgetAmount) as budgetSum,
         SUM(ms2.transactionAmount) as transactionSum FROM MonthSums ms1
