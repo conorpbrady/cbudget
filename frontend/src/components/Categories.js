@@ -1,9 +1,6 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { Alert, Button, Table } from 'react-bootstrap';
-import {
-  useGetCategories,
-  useGetFirstCategory,
-} from '../hooks/useGetCategories';
+import { useGetCategories } from '../hooks/useGetCategories';
 import {
   submitNewGroup,
   submitNewBucket,
@@ -13,13 +10,14 @@ import ConfirmationModal from './ConfirmationModal';
 import { useDeleteModal } from '../hooks/useDeleteModal';
 
 export default function Categories() {
-  const { categories, firstCategoryId } = useGetCategories();
   const initBucket = { name: '', parent: firstCategoryId };
 
   const [newBucket, setNewBucket] = useState(initBucket);
   const [newGroup, setNewGroup] = useState('');
 
   const [fetchToggle, setFetchToggle] = useState(false);
+  const { categories, firstCategoryId } = useGetCategories(fetchToggle);
+
   const {
     resultMessage,
     resultType,
@@ -41,6 +39,7 @@ export default function Categories() {
   };
   const handleGroupSubmit = (event) => {
     event.preventDefault();
+    submitNewGroup(newGroup);
     setNewGroup('');
     setFetchToggle(!fetchToggle);
   };

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import axiosInstance from '../api/axiosApi';
 
-export const useGetCategories = () => {
+export const useGetCategories = (fetchToggle) => {
   const [categories, setCategories] = useState([]);
   const [firstCategoryId, setFirstCategoryId] = useState(0);
 
@@ -18,7 +18,7 @@ export const useGetCategories = () => {
         });
     }
     handleFetch();
-  }, []);
+  }, [fetchToggle]);
 
-  return { categories, firstCategoryId }
+  return { categories, firstCategoryId };
 };
