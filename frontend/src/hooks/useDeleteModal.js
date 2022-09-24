@@ -9,6 +9,7 @@ export const useDeleteModal = (submitOnDelete) => {
   const [resultType, setResultType] = useState(null);
 
   const displayConfirmationModal = (type, id) => {
+    console.log(`calling delete modal ${type} ${id}`);
     setType(type);
     setId(id);
     setDeleteMessage(`Are you sure you want to delete ${type} ${id}`);

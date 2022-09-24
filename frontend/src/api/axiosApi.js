@@ -69,6 +69,7 @@ axiosInstance.interceptors.response.use(
     ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
+          console.log('adding to failed queue');
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
@@ -105,6 +106,8 @@ axiosInstance.interceptors.response.use(
                 resolve(axiosInstance(originalRequest));
               })
               .catch((err) => {
+                console.log(err);
+                console.log('adding to process queue');
                 processQueue(err, null);
                 reject(err);
               })
