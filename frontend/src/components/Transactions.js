@@ -103,6 +103,35 @@ export default function Transaction() {
     setEditedTransaction(initTransaction);
   };
 
+  const newTransactionForm = (
+    <TransactionForm
+      details={newTransaction}
+      accounts={accounts}
+      categories={categories}
+      payees={payees}
+      handleChange={handleChange}
+      handleCreate={handleCreate}
+      handleDelete={displayConfirmationModal}
+      handleSelectChange={handleSelectChange}
+      handleCancel={handleCancel}
+      transactionBeingEdited={transactionToEdit != 0}
+    />
+  );
+
+  const editTransactionForm = (
+    <TransactionForm
+      details={editedTransaction}
+      accounts={accounts}
+      categories={categories}
+      payees={payees}
+      handleChange={handleEditChange}
+      handleCreate={handleCreate}
+      handleDelete={displayConfirmationModal}
+      handleSelectChange={handleSelectEditChange}
+      handleSubmit={handleSubmit}
+      handleCancel={handleCancel}
+    />
+  );
   return (
     <>
       {resultMessage && (
@@ -127,22 +156,13 @@ export default function Transaction() {
           </thead>
           <tbody>
             <TransactionList
-              transactions={transactions}
-              transactionToEdit={transactionToEdit}
-              handleMakeTransactionEditable={handleMakeTransactionEditable}
-              accounts={accounts}
-              categories={categories}
-              payees={payees}
-              handleChange={handleChange}
-              handleCreate={handleCreate}
-              handleSelectChange={handleSelectChange}
-              handleSelectEditChange={handleSelectEditChange}
-              newTransaction={newTransaction}
-              handleSubmit={handleSubmit}
-              handleDelete={displayConfirmationModal}
-              handleCancel={handleCancel}
-              handleEditChange={handleEditChange}
-              editObject={editedTransaction}
+              {...{
+                transactions,
+                transactionToEdit,
+                newTransactionForm,
+                editTransactionForm,
+                handleMakeTransactionEditable,
+              }}
             />
           </tbody>
         </Table>
@@ -153,23 +173,11 @@ export default function Transaction() {
 }
 
 function TransactionList(props) {
-  const showAddTransactionRow = props.transactionToEdit === 0;
   const transactionList = props.transactions.map((trn, index) => {
     return (
       <tr key={index} onClick={() => props.handleMakeTransactionEditable(trn)}>
         {trn.id === props.transactionToEdit ? (
-          <TransactionForm
-            details={props.editObject}
-            accounts={props.accounts}
-            categories={props.categories}
-            payees={props.payees}
-            handleChange={props.handleEditChange}
-            handleCreate={props.handleCreate}
-            handleDelete={props.handleDelete}
-            handleSelectChange={props.handleSelectEditChange}
-            handleSubmit={props.handleSubmit}
-            handleCancel={props.handleCancel}
-          />
+          props.editTransactionForm
         ) : (
           <DisplayTransaction details={trn} />
         )}
@@ -179,20 +187,7 @@ function TransactionList(props) {
 
   return (
     <>
-      <tr>
-        <TransactionForm
-          details={props.newTransaction}
-          accounts={props.accounts}
-          categories={props.categories}
-          payees={props.payees}
-          handleChange={props.handleChange}
-          handleCreate={props.handleCreate}
-          handleDelete={props.handleDelete}
-          handleSelectChange={props.handleSelectChange}
-          handleCancel={props.handleCancel}
-          transactionBeingEdited={!showAddTransactionRow}
-        />
-      </tr>
+      <tr>{props.newTransactionForm}</tr>
       {transactionList}
     </>
   );
