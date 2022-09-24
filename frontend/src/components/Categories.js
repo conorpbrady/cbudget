@@ -19,13 +19,14 @@ export default function Categories() {
   const [newBucket, setNewBucket] = useState(initBucket);
   const [newGroup, setNewGroup] = useState('');
 
+  const [fetchToggle, setFetchToggle] = useState(false);
   const {
     resultMessage,
     resultType,
     clearResult,
     displayConfirmationModal,
     modalChildren,
-  } = useDeleteModal(submitDeleteCategory);
+  } = useDeleteModal(submitDeleteCategory, () => setFetchToggle(!fetchToggle));
 
   // TODO: This seems unnecessary - Due to state lifecycle / async calls, parent is not
   // getting updated with a valid category ID on the first render
@@ -41,6 +42,7 @@ export default function Categories() {
   const handleGroupSubmit = (event) => {
     event.preventDefault();
     setNewGroup('');
+    setFetchToggle(!fetchToggle);
   };
 
   const handleBucketChange = (event) => {
@@ -51,6 +53,7 @@ export default function Categories() {
     event.preventDefault();
     submitNewBucket(newBucket);
     setNewBucket(initBucket);
+    setFetchToggle(!fetchToggle);
   };
 
   return (

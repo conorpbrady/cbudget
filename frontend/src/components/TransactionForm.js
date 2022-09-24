@@ -137,13 +137,13 @@ export default function TransactionForm(props) {
       ) : (
         <>
           <td>
-            <Button variant="outline-danger">
-              <FontAwesomeIcon
-                icon={faTrash}
-                onClick={() =>
-                  props.handleDelete('transaction', props.details.id)
-                }
-              />
+            <Button
+              variant="outline-danger"
+              onClick={() =>
+                props.handleDelete('transaction', props.details.id)
+              }
+            >
+              <FontAwesomeIcon icon={faTrash} />
             </Button>
           </td>
           <td>

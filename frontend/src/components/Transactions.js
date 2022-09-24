@@ -43,7 +43,10 @@ export default function Transaction() {
     clearResult,
     displayConfirmationModal,
     modalChildren,
-  } = useDeleteModal(submitDeleteTransaction);
+  } = useDeleteModal(submitDeleteTransaction, () => {
+    setFetchToggle(!fetchToggle);
+    setTransactionToEdit(0);
+  });
 
   const handleMakeTransactionEditable = (transactionObject) => {
     if (transactionToEdit != 0) {
@@ -174,13 +177,11 @@ export default function Transaction() {
 
 function TransactionList(props) {
   const transactionList = props.transactions.map((trn, index) => {
-    return (
+    return trn.id === props.transactionToEdit ? (
+      <tr key={index}>{props.editTransactionForm}</tr>
+    ) : (
       <tr key={index} onClick={() => props.handleMakeTransactionEditable(trn)}>
-        {trn.id === props.transactionToEdit ? (
-          props.editTransactionForm
-        ) : (
-          <DisplayTransaction details={trn} />
-        )}
+        <DisplayTransaction details={trn} />
       </tr>
     );
   });

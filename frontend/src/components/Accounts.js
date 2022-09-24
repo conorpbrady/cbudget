@@ -19,7 +19,7 @@ export default function Accounts() {
     clearResult,
     displayConfirmationModal,
     modalChildren,
-  } = useDeleteModal(submitDeleteAccount);
+  } = useDeleteModal(submitDeleteAccount, () => setFetchToggle(!fetchToggle));
 
   const handleChange = useCallback(({ target: { name, value } }) =>
     setInputs((prevState) => ({ ...prevState, [name]: value }), [])
