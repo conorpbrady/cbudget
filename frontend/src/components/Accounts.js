@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { submitNewAccount, submitDeleteAccount } from '../api/accountsApi';
 import { useGetAccounts } from '../hooks/useGetAccounts';
-import { ConfirmationModal } from './ConfirmationModal';
+import ConfirmationModal from './ConfirmationModal';
 import { Button, Alert } from 'react-bootstrap';
 
 export default function Accounts() {

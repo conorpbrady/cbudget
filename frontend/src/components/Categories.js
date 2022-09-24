@@ -1,6 +1,5 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { Alert, Button, Table } from 'react-bootstrap';
-import axiosInstance from '../api/axiosApi';
 import {
   useGetCategories,
   useGetFirstCategory,
@@ -10,7 +9,8 @@ import {
   submitNewBucket,
   submitDeleteCategory,
 } from '../api/categoryApi';
-import { ConfirmationModal } from './ConfirmationModal';
+import ConfirmationModal from './ConfirmationModal';
+import { useDeleteModal } from '../hooks/useDeleteModal';
 
 export default function Categories() {
   const { categories, firstCategoryId } = useGetCategories();
@@ -19,37 +19,13 @@ export default function Categories() {
   const [newBucket, setNewBucket] = useState(initBucket);
   const [newGroup, setNewGroup] = useState('');
 
-  // TODO: This exact code is in Accounts component, find a way to lift it out and reuse
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [id, setId] = useState(null);
-  const [type, setType] = useState(null);
-  const [deleteMessage, setDeleteMessage] = useState(null);
-  const [resultMessage, setResultMessage] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
-
-  const displayConfirmationModal = (type, id) => {
-    setType(type);
-    setId(id);
-    setDeleteMessage(`Are you sure you want to delete ${type} ${id}`);
-    setShowConfirmationModal(true);
-  };
-
-  const hideConfirmationModal = () => {
-    setShowConfirmationModal(false);
-  };
-
-  const submitDelete = (type, id) => {
-    submitDeleteCategory(type, id)
-      .then((resultMessage) => {
-        setResultMessage(resultMessage);
-      })
-      .catch((errorMessage) => {
-        setErrorMessage(errorMessage);
-      })
-      .finally(() => {
-        setShowConfirmationModal(false);
-      });
-  };
+  const {
+    resultMessage,
+    resultType,
+    clearResult,
+    displayConfirmationModal,
+    modalChildren,
+  } = useDeleteModal(submitDeleteCategory);
 
   // TODO: This seems unnecessary - Due to state lifecycle / async calls, parent is not
   // getting updated with a valid category ID on the first render
@@ -80,21 +56,8 @@ export default function Categories() {
   return (
     <div>
       {resultMessage && (
-        <Alert
-          variant="success"
-          onClose={() => setResultMessage(null)}
-          dismissible
-        >
+        <Alert variant={resultType} onClose={clearResult} dismissible>
           {resultMessage}
-        </Alert>
-      )}
-      {errorMessage && (
-        <Alert
-          variant="danger"
-          onClose={() => setErrorMessage(null)}
-          dismissible
-        >
-          {errorMessage}
         </Alert>
       )}
       <Table striped>
@@ -123,14 +86,7 @@ export default function Categories() {
           onBucketSubmit={handleBucketSubmit}
         />
       </div>
-      <ConfirmationModal
-        showModal={showConfirmationModal}
-        confirmModal={submitDelete}
-        hideModal={hideConfirmationModal}
-        type={type}
-        id={id}
-        message={deleteMessage}
-      />
+      <ConfirmationModal {...modalChildren} />
     </div>
   );
 }

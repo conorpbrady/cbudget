@@ -1,12 +1,18 @@
 import React, { useState, useCallback } from 'react';
+import { Table, Alert } from 'react-bootstrap';
+
 import { useGetTransactionInfo } from '../hooks/useGetTransactionInfo';
+import { useDeleteModal } from '../hooks/useDeleteModal';
+
 import TransactionForm from './TransactionForm';
+import ConfirmationModal from './ConfirmationModal';
+
 import {
   submitEditTransaction,
   submitNewTransaction,
   submitNewPayee,
+  submitDeleteTransaction,
 } from '../api/transactionApi';
-import { Table, Alert, Button } from 'react-bootstrap';
 
 export default function Transaction() {
   const initTransaction = {
@@ -31,6 +37,13 @@ export default function Transaction() {
   const [fetchToggle, setFetchToggle] = useState(false);
   const { transactions, accounts, categories, payees } =
     useGetTransactionInfo(fetchToggle);
+  const {
+    resultMessage,
+    resultType,
+    clearResult,
+    displayConfirmationModal,
+    modalChildren,
+  } = useDeleteModal(submitDeleteTransaction);
 
   const handleMakeTransactionEditable = (transactionObject) => {
     if (transactionToEdit != 0) {
@@ -91,42 +104,51 @@ export default function Transaction() {
   };
 
   return (
-    <form onSubmit={(e) => handleSubmit(e, transactionToEdit != 0)}>
-      <Table striped>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Account</th>
-            <th>Payee</th>
-            <th>Category</th>
-            <th>Note</th>
-            <th>In</th>
-            <th>Out</th>
-            <th>Cleared</th>
-            <th>Reconciled</th>
-          </tr>
-        </thead>
-        <tbody>
-          <TransactionList
-            transactions={transactions}
-            transactionToEdit={transactionToEdit}
-            handleMakeTransactionEditable={handleMakeTransactionEditable}
-            accounts={accounts}
-            categories={categories}
-            payees={payees}
-            handleChange={handleChange}
-            handleCreate={handleCreate}
-            handleSelectChange={handleSelectChange}
-            handleSelectEditChange={handleSelectEditChange}
-            newTransaction={newTransaction}
-            handleSubmit={handleSubmit}
-            handleCancel={handleCancel}
-            handleEditChange={handleEditChange}
-            editObject={editedTransaction}
-          />
-        </tbody>
-      </Table>
-    </form>
+    <>
+      {resultMessage && (
+        <Alert variant={resultType} onClose={clearResult} dismissible>
+          {resultMessage}
+        </Alert>
+      )}
+      <form onSubmit={(e) => handleSubmit(e, transactionToEdit != 0)}>
+        <Table striped>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Account</th>
+              <th>Payee</th>
+              <th>Category</th>
+              <th>Note</th>
+              <th>In</th>
+              <th>Out</th>
+              <th>Cleared</th>
+              <th>Reconciled</th>
+            </tr>
+          </thead>
+          <tbody>
+            <TransactionList
+              transactions={transactions}
+              transactionToEdit={transactionToEdit}
+              handleMakeTransactionEditable={handleMakeTransactionEditable}
+              accounts={accounts}
+              categories={categories}
+              payees={payees}
+              handleChange={handleChange}
+              handleCreate={handleCreate}
+              handleSelectChange={handleSelectChange}
+              handleSelectEditChange={handleSelectEditChange}
+              newTransaction={newTransaction}
+              handleSubmit={handleSubmit}
+              handleDelete={displayConfirmationModal}
+              handleCancel={handleCancel}
+              handleEditChange={handleEditChange}
+              editObject={editedTransaction}
+            />
+          </tbody>
+        </Table>
+        <ConfirmationModal {...modalChildren} />
+      </form>
+    </>
   );
 }
 
@@ -143,6 +165,7 @@ function TransactionList(props) {
             payees={props.payees}
             handleChange={props.handleEditChange}
             handleCreate={props.handleCreate}
+            handleDelete={props.handleDelete}
             handleSelectChange={props.handleSelectEditChange}
             handleSubmit={props.handleSubmit}
             handleCancel={props.handleCancel}
@@ -164,6 +187,7 @@ function TransactionList(props) {
           payees={props.payees}
           handleChange={props.handleChange}
           handleCreate={props.handleCreate}
+          handleDelete={props.handleDelete}
           handleSelectChange={props.handleSelectChange}
           handleCancel={props.handleCancel}
           transactionBeingEdited={!showAddTransactionRow}

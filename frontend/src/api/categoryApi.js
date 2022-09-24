@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import axiosInstance from './axiosApi';
 
 export const submitNewGroup = (newGroup) => {

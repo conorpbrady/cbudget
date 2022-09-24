@@ -1,25 +1,31 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
 
-export const ConfirmationModal = ( { showModal, hideModal, confirmModal, id, type, message }) => {
+export default function ConfirmationModal(props) {
   return (
-    <Modal show={showModal} onHide={hideModal}>
-    <Modal.Header closeButton>
-      <Modal.Title>Confirm Delete</Modal.Title>
-    </Modal.Header>
+    <Modal
+      show={props.showConfirmationModal}
+      onHide={props.hideConfirmationModal}
+    >
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Delete</Modal.Title>
+      </Modal.Header>
 
-    <Modal.Body>
-      <div className="alert alert-danger">{message}</div>
-    </Modal.Body>
+      <Modal.Body>
+        <div className="alert alert-danger">{props.deleteMessage}</div>
+      </Modal.Body>
 
-    <Modal.Footer>
-      <Button variant="default" onClick={hideModal}>
-        Cancel
-      </Button>
-      <Button variant="danger" onClick={() => confirmModal(type, id) }>
-        Delete
-      </Button>
-    </Modal.Footer>
+      <Modal.Footer>
+        <Button variant="default" onClick={props.hideConfirmationModal}>
+          Cancel
+        </Button>
+        <Button
+          variant="danger"
+          onClick={() => props.onConfirm(props.type, props.id)}
+        >
+          Delete
+        </Button>
+      </Modal.Footer>
     </Modal>
-  )
+  );
 }

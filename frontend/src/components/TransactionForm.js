@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import Select from 'react-select';
 import Creatable from 'react-select/creatable';
 import { Button } from 'react-bootstrap';
@@ -138,7 +138,12 @@ export default function TransactionForm(props) {
         <>
           <td>
             <Button variant="outline-danger">
-              <FontAwesomeIcon icon={faTrash} />
+              <FontAwesomeIcon
+                icon={faTrash}
+                onClick={() =>
+                  props.handleDelete('transaction', props.details.id)
+                }
+              />
             </Button>
           </td>
           <td>

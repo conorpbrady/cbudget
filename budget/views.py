@@ -148,11 +148,11 @@ class TransactionList(generics.ListCreateAPIView):
                 ta_bucket = ta_bucket
                 )
 
-class TransactionDetail(generics.UpdateAPIView):
+class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TransactionSerializer
     lookup_field = 'id'
     def get_queryset(self):
-        return Transaction.objects.filter(id = self.request.data['id'])
+        return Transaction.objects.all()
 
     def perform_update(self, serializer):
         ta_account = Account.objects.get(id = self.request.data['account_id'])
