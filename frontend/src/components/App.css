@@ -15,7 +15,7 @@ body {
 
 nav {
   background-color: #212333;
-  padding: 0.5em 0.2em;
+  padding: 0.5em 02em;
 }
 
 nav ul {
@@ -43,4 +43,16 @@ main {
 
 .bi {
   font-family: bootstrap-icons;
+}
+.nav-light {
+  background-color: #6C7A9E;
+}
+#auth-navbar {
+  padding-bottom: 0em;
+}
+#auth-navbar-tabs {
+  border-width: 0px;
+}
+.active a {
+  background-color: green !important;
 }

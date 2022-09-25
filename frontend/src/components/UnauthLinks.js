@@ -3,17 +3,17 @@ import { Link } from 'react-router-dom';
 
 export default function UnauthLinks() {
   return (
-    <>
-      <li>
+    <ul className={'nav'}>
+      <li className={'nav-item'}>
         <Link className={'nav-link'} to={'/login'}>
           Login
         </Link>
       </li>
-      <li>
+      <li className={'nav-item'}>
         <Link className={'nav-link'} to={'/signup'}>
           Signup
         </Link>
       </li>
-    </>
+    </ul>
   );
 }
