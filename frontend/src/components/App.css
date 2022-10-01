@@ -53,6 +53,11 @@ main {
 #auth-navbar-tabs {
   border-width: 0px;
 }
+
+#navbar-primary {
+  padding: 0 1em;
+}
+
 .active a {
   background-color: green !important;
 }
