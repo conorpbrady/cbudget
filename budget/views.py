@@ -215,25 +215,39 @@ class TransactionSumList(generics.ListAPIView):
                 .annotate(ta_amount = (Sum('in_amount') - Sum('out_amount')))
 
 class CumSumList(viewsets.ViewSet):
+
     query_string = """
-        WITH GroupedTransactions AS
+WITH GroupedTransactions AS
         (
             SELECT month_id, ta_bucket_id, SUM(in_amount) AS Income, SUM(out_amount) AS Expenditures
-            FROM budget_transaction GROUP BY month_id, ta_bucket_id
+            FROM budget_transaction WHERE owner_id={0} GROUP BY month_id, ta_bucket_id
+
         ),
+		MonthCat AS (
+			SELECT mb.month_id as month,
+            mb.category_id as category
+			from budget_monthlybudget mb
+            WHERE mb.owner_id = 9
+			UNION
+			SELECT
+			t.month_id as month,
+			t.ta_bucket_id as category
+			FROM GroupedTransactions t
+		),
         MonthSums AS
         (
-            SELECT mb.month_id as month,
-            mb.category_id as category,
+            SELECT mc.month as month,
+            mc.category as category,
             SUM(mb.Amount) as budgetAmount,
             t.Income as income,
             t.Expenditures as expenditures,
             t.Income - t.Expenditures as transactionAmount
-            FROM budget_MonthlyBudget mb
-            LEFT JOIN budget_month as m ON m.id = mb.month_id
-            LEFT JOIN budget_bucket as c ON c.id = mb.category_id
-            LEFT JOIN GroupedTransactions as t ON t.month_id = m.id AND t.ta_bucket_id = c.id
-            GROUP BY mb.month_id, mb.category_id
+            FROM MonthCat mc
+			LEFT JOIN budget_monthlybudget as mb ON mb.month_id = mc.month and mb.category_id = mc.category and mb.owner_id = {0}
+            LEFT JOIN budget_month as m ON m.id = mc.month
+            LEFT JOIN budget_bucket as c ON c.id = mc.category
+			LEFT JOIN GroupedTransactions as t ON mc.month = t.month_id and mc.category = t.ta_bucket_id
+            GROUP BY mc.month, mc.category
         )
 
         SELECT ms1.month,
@@ -249,8 +263,10 @@ class CumSumList(viewsets.ViewSet):
     """
 
     def list(self, request):
+        owner_id = self.request.user.id
+
         with connection.cursor() as cursor:
-            cursor.execute(self.query_string)
+            cursor.execute(self.query_string.format(owner_id))
             columns = [col[0] for col in cursor.description]
             instance = [
                 dict(zip(columns, row))

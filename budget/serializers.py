@@ -86,7 +86,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ('id', 'ta_date', 'account', 'account_id', 'payee', \
                 'payee_id', 'category', 'category_id', \
-                'note', 'in_amount', 'out_amount', 'cleared', 'reconciled', 'system')
+                'note', 'in_amount', 'out_amount', 'cleared', 'reconciled')
 
 class CategorySerializer(serializers.ModelSerializer):
     bucket = BucketSerializer(many=True)

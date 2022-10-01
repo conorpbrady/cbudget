@@ -79,7 +79,8 @@ class Transaction(BaseModel):
     cleared = models.BooleanField(default = False)
     reconciled = models.BooleanField(default = False)
     system = models.BooleanField(default = False)
-    transfer_pair = models.OneToOneField('Transaction', on_delete=models.CASCADE, null = True)
+    transfer_pair = models.OneToOneField('Transaction', on_delete=models.CASCADE, null = True, default=None)
+    cc_debt = models.BooleanField(default = False)
 
     def __str__(self):
         return "{} {} {}".format(self.ta_account, self.ta_payee, self.ta_bucket)

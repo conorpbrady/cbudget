@@ -19,6 +19,21 @@ export const transformSumData = (data) => {
   let output = {};
 
   data.map((item) => {
+
+    const expendituresTotal = parseInt(
+      output.months?.[item.month.id]?.expenditures || 0
+    );
+    const newExpendituresTotal = expendituresTotal + parseInt(item.expenditures || 0)
+    const monthIncomeTotal = parseInt(
+      output.months?.[item.month.id]?.income || 0
+    );
+    const newIncomeTotal = monthIncomeTotal + parseInt(item.income || 0);
+
+    const monthBudgetTotal = parseInt(
+      output.months?.[item.month.id]?.budgetAmount || 0
+    );
+    const newMonthBudgetTotal = monthBudgetTotal + parseInt(item.budgetAmount || 0)
+
     const budgetTotal = parseInt(
       output[item.category.parent]?.months?.[item.month.id]?.budgetTotal || 0
     );
@@ -59,10 +74,10 @@ export const transformSumData = (data) => {
       months: {
         ...output.months,
         [item.month.id]: {
-          income: item.income,
-          expenditures: item.expenditures,
-          leftToBudget: item.income - item.budgetAmount,
-          budgetAmount: item.budgetAmount,
+          income: newIncomeTotal,
+          expenditures: newExpendituresTotal, 
+          leftToBudget: (newIncomeTotal - newMonthBudgetTotal), 
+          budgetAmount: newMonthBudgetTotal,
         },
       },
     };
