@@ -121,7 +121,7 @@ class MonthlyBudgetUpdate(generics.UpdateAPIView):
 class PayeeList(generics.ListCreateAPIView):
     serializer_class = PayeeSerializer
     def get_queryset(self):
-        return Payee.objects.filter(owner = self.request.user)
+        return Payee.objects.filter(owner = self.request.user, visible = True)
 
     def perform_create(self, serializer):
         serializer.save(owner = self.request.user)

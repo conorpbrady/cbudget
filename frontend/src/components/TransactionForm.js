@@ -56,7 +56,7 @@ export default function TransactionForm(props) {
           name="ta_date"
           value={props.details.ta_date}
           onChange={props.handleChange}
-          disabled={props.transactionBeingEdited}
+          disabled={props.transactionBeingEdited || props.details.system}
         />
       </td>
       <td>
@@ -65,7 +65,7 @@ export default function TransactionForm(props) {
           options={accOptions}
           value={accSelectedOption}
           onChange={props.handleSelectChange}
-          isDisabled={props.transactionBeingEdited}
+          isDisabled={props.transactionBeingEdited || props.details.system}
         />
       </td>
       <td>
@@ -75,7 +75,7 @@ export default function TransactionForm(props) {
           value={paySelectedOption}
           onChange={props.handleSelectChange}
           onCreateOption={props.handleCreate}
-          isDisabled={props.transactionBeingEdited}
+          isDisabled={props.transactionBeingEdited || props.details.system}
         />
       </td>
       <td>
@@ -84,7 +84,7 @@ export default function TransactionForm(props) {
           options={catOptions}
           value={catSelectedOption}
           onChange={props.handleSelectChange}
-          isDisabled={props.transactionBeingEdited}
+          isDisabled={props.transactionBeingEdited || props.details.system}
         />
       </td>
       <td>
@@ -120,7 +120,7 @@ export default function TransactionForm(props) {
           name="cleared"
           value={props.details.cleared}
           onChange={props.handleChange}
-          disabled={props.transactionBeingEdited}
+          disabled={props.transactionBeingEdited || props.details.system}
         />
       </td>
       <td>
@@ -129,7 +129,7 @@ export default function TransactionForm(props) {
           name="reconciled"
           value={props.details.reconciled}
           onChange={props.handleChange}
-          disabled={props.transactionBeingEdited}
+          disabled={props.transactionBeingEdited || props.details.system}
         />
       </td>
       {props.transactionBeingEdited ? (

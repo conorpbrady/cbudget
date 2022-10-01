@@ -6,7 +6,7 @@ import { useDeleteModal } from '../hooks/useDeleteModal';
 import { Button, Alert } from 'react-bootstrap';
 
 export default function Accounts() {
-  const initInputs = { accountName: '', accountType: 0 };
+  const initInputs = { accountName: '', accountType: 0, balance: 0 };
 
   const [inputs, setInputs] = useState(initInputs);
   const [fetchToggle, setFetchToggle] = useState(false);
@@ -73,7 +73,15 @@ export default function Accounts() {
             <option value="3">Credit Card</option>
           </select>
         </label>
-
+        <label>
+          Starting Balance:
+          <input
+            type="numeric"
+            name="balance"
+            onChange={handleChange}
+            value={inputs.accountBalance}
+          />
+        </label>
         <input type="submit" value="Submit" />
       </form>
       <ConfirmationModal {...modalChildren} />
