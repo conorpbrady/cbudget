@@ -10,11 +10,16 @@ export const submitEditTransaction = (editTransaction) => {
 };
 
 export const submitNewPayee = (newPayee) => {
-  const [payeeId, setPayeeId] = useState(0);
-  axiosInstance.post('/api/payee', newPayee).then((response) => {
-    setPayeeId(response.data.id);
+  return new Promise((resolve, reject) => {
+    axiosInstance
+      .post('/api/payee', newPayee)
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((error) => {
+        resolve(reject);
+      });
   });
-  return { payeeId };
 };
 
 export const submitDeleteTransaction = (type, id) => {

@@ -18,13 +18,16 @@ class BaseModel(models.Model):
 
 class Group(BaseModel):
     name = models.CharField(max_length = 32)
-
+    on_budget = models.BooleanField(default = True)
+    on_transaction = models.BooleanField(default = True)
     def __str__(self):
         return self.name
 
 class Bucket(BaseModel):
     name = models.CharField(max_length = 32)
     parent = models.ForeignKey(Group, related_name='bucket', on_delete=models.RESTRICT, null=True)
+    on_budget = models.BooleanField(default = True)
+    on_transaction = models.BooleanField(default = True)
     def __str__(self):
         return self.name
 

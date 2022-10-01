@@ -8,7 +8,7 @@ export const useGetCategories = (fetchToggle) => {
   useEffect(() => {
     async function handleFetch() {
       await axiosInstance
-        .get('/api/category')
+        .get('/api/category?transaction=true&budget=true')
         .then((response) => {
           setCategories(response.data);
           setFirstCategoryId(response.data[0].id);

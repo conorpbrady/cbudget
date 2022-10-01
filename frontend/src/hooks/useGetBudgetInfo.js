@@ -11,7 +11,7 @@ export const useGetCategories = () => {
 
   useEffect(() => {
     async function handleFetch() {
-      await axiosInstance.get('/api/category').then((response) => {
+      await axiosInstance.get('/api/category?budget=true').then((response) => {
         setCategories(response.data);
       });
     }

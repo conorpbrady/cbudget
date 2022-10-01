@@ -11,7 +11,7 @@ export default function Navbar(props) {
 
   return (
     <>
-      <nav className={'navbar'}>
+      <nav className={'navbar'} id={'navbar-primary'}>
         <Link className={'nav-link navbar-brand'} to={'/'}>
           <FontAwesomeIcon icon={faMagnifyingGlassDollar} />
           {'  '}
