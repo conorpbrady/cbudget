@@ -58,7 +58,7 @@ class BudgetUserCreate(generics.CreateAPIView):
 class GroupList(generics.ListCreateAPIView):
     serializer_class = GroupSerializer
     def get_queryset(self):
-        return Group.objects.filter(owner = self.request.user)
+        return Group.objects.filter(owner = self.request.user, on_transaction=True, on_budget=True)
 
     def perform_create(self, serializer):
         serializer.save(owner = self.request.user)
@@ -73,7 +73,7 @@ class GroupDetail(generics.GenericAPIView, mixins.DestroyModelMixin):
 class BucketList(generics.ListCreateAPIView):
     serializer_class = BucketSerializer
     def get_queryset(self):
-        return Bucket.objects.filter(owner = self.request.user)
+        return Bucket.objects.filter(owner = self.request.user, on_transaction=True, on_budget=True)
 
     def perform_create(self, serializer):
         parent = Group(self.request.data['parent'])
@@ -101,7 +101,6 @@ class AccountDetail(generics.GenericAPIView, mixins.DestroyModelMixin):
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
-
 class MonthlyBudgetList(generics.ListCreateAPIView):
     serializer_class = MonthlyBudgetSerializer
     def get_queryset(self):
@@ -110,7 +109,7 @@ class MonthlyBudgetList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         month = Month.objects.get(id = self.request.data['month'])
-        category = Bucket.objects.get(id = self.request.data['category'])
+        category = Bucket.objects.get(id = self.request.data['category'], on_budget=True)
         serializer.save(owner = self.request.user, month = month, category = category)
 
 
@@ -122,7 +121,7 @@ class MonthlyBudgetUpdate(generics.UpdateAPIView):
 class PayeeList(generics.ListCreateAPIView):
     serializer_class = PayeeSerializer
     def get_queryset(self):
-        return Payee.objects.filter(owner = self.request.user)
+        return Payee.objects.filter(owner = self.request.user, visible = True)
 
     def perform_create(self, serializer):
         serializer.save(owner = self.request.user)
@@ -135,7 +134,7 @@ class TransactionList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         ta_account = Account.objects.get(id = self.request.data['account_id'])
         ta_payee = Payee.objects.get(id = self.request.data['payee_id'])
-        ta_bucket = Bucket.objects.get(id = self.request.data['category_id'])
+        ta_bucket = Bucket.objects.get(id = self.request.data['category_id'], on_transaction=True)
         query_date = self.request.data['ta_date']
 
         month = Month.objects.get(start_date__lte = query_date, end_date__gte = query_date)
@@ -173,7 +172,22 @@ class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
 class CategoryList(generics.ListAPIView):
     serializer_class = CategorySerializer
     def get_queryset(self):
-        return Group.objects.filter(owner = self.request.user)
+        on_transaction = None
+        on_budget = None
+        if 'transaction' in self.request.query_params:
+            on_transaction = self.request.query_params['transaction'].lower() == 'true'
+
+        if 'budget' in self.request.query_params:
+            on_budget = self.request.query_params['budget'].lower() == 'true'
+
+        if on_budget is None and on_transaction is None:
+            return Group.objects.filter(owner = self.request.user)
+        elif on_budget is not None and on_transaction is None:
+            return Group.objects.filter(owner = self.request.user, on_budget = on_budget)
+        elif on_budget is None and on_transaction is not None:
+            return Group.objects.filter(owner = self.request.user, on_transaction=on_transaction)
+        else:
+            return Group.objects.filter(owner = self.request.user, on_transaction = on_transaction, on_budget = on_budget)
 
 class MonthlySumList(generics.ListAPIView):
     serializer_class = MonthlySumSerializer
@@ -202,12 +216,12 @@ class TransactionSumList(generics.ListAPIView):
 
 class CumSumList(viewsets.ViewSet):
     query_string = """
-        WITH GroupedTransactions AS 
+        WITH GroupedTransactions AS
         (
             SELECT month_id, ta_bucket_id, SUM(in_amount) AS Income, SUM(out_amount) AS Expenditures
             FROM budget_transaction GROUP BY month_id, ta_bucket_id
-        ), 
-        MonthSums AS 
+        ),
+        MonthSums AS
         (
             SELECT mb.month_id as month,
             mb.category_id as category,

@@ -66,7 +66,7 @@ class AccountSerializer(serializers.ModelSerializer):
     accountType = serializers.CharField(source='account_type')
     class Meta:
         model = Account
-        fields = ('id', 'accountName', 'accountType')
+        fields = ('id', 'accountName', 'accountType', 'balance')
 
 class PayeeSerializer(serializers.ModelSerializer):
     linked_bucket = serializers.StringRelatedField()
@@ -86,7 +86,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ('id', 'ta_date', 'account', 'account_id', 'payee', \
                 'payee_id', 'category', 'category_id', \
-                'note', 'in_amount', 'out_amount', 'cleared', 'reconciled')
+                'note', 'in_amount', 'out_amount', 'cleared', 'reconciled', 'system')
 
 class CategorySerializer(serializers.ModelSerializer):
     bucket = BucketSerializer(many=True)

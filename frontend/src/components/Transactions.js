@@ -35,7 +35,7 @@ export default function Transaction() {
   const [newTransaction, setNewTransaction] = useState(initTransaction);
   const [editedTransaction, setEditedTransaction] = useState(initTransaction);
   const [fetchToggle, setFetchToggle] = useState(false);
-  const { transactions, accounts, categories, payees } =
+  const { transactions, accounts, categories, payees, updatePayees } =
     useGetTransactionInfo(fetchToggle);
   const {
     resultMessage,
@@ -81,13 +81,23 @@ export default function Transaction() {
   };
 
   const handleCreate = (selectedOption) => {
+    console.log(selectedOption);
     const newPayee = { name: selectedOption };
-    const { newPayeeId } = submitNewPayee(newPayee);
-    setNewTransaction((prevState) => ({
-      ...prevState,
-      payee: newPayeeId,
-    }));
+    submitNewPayee(newPayee)
+      .then((response) => {
+        setNewTransaction((prevState) => ({
+          ...prevState,
+          payee: selectedOption,
+          payee_id: response.data.id,
+        }));
+
+        updatePayees({ id: response.data.id, name: selectedOption });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
+
   const handleSubmit = (event, isEditTransaction) => {
     event.preventDefault();
 

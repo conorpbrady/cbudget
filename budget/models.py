@@ -18,13 +18,16 @@ class BaseModel(models.Model):
 
 class Group(BaseModel):
     name = models.CharField(max_length = 32)
-
+    on_budget = models.BooleanField(default = True)
+    on_transaction = models.BooleanField(default = True)
     def __str__(self):
         return self.name
 
 class Bucket(BaseModel):
     name = models.CharField(max_length = 32)
     parent = models.ForeignKey(Group, related_name='bucket', on_delete=models.RESTRICT, null=True)
+    on_budget = models.BooleanField(default = True)
+    on_transaction = models.BooleanField(default = True)
     def __str__(self):
         return self.name
 
@@ -43,7 +46,7 @@ class MonthlyBudget(BaseModel):
 
 class Account(BaseModel):
     name = models.CharField(max_length = 32)
-
+    balance = models.DecimalField(decimal_places = 2, max_digits = 11, default = 0)
     class AccountType(models.IntegerChoices):
         CASH = 0
         CHECKING = 1
@@ -57,7 +60,6 @@ class Account(BaseModel):
     def __str__(self):
         return self.name
 
-
 class Payee(BaseModel):
     linked_bucket = models.ForeignKey(Bucket, related_name='payee', on_delete=models.RESTRICT, null=True)
     name = models.CharField(max_length = 32)
@@ -69,13 +71,15 @@ class Transaction(BaseModel):
     ta_date = models.DateField(default = date.today)
     month = models.ForeignKey(Month, related_name='month', on_delete=models.RESTRICT)
     ta_payee = models.ForeignKey(Payee, related_name='payees', on_delete=models.RESTRICT, null=True)
-    ta_account = models.ForeignKey(Account, related_name='accounts', on_delete=models.RESTRICT, null=True)
+    ta_account = models.ForeignKey(Account, related_name='accounts', on_delete=models.CASCADE, null=True)
     ta_bucket = models.ForeignKey(Bucket, related_name='buckets', on_delete=models.RESTRICT, null=True)
     note = models.TextField(max_length = 255, blank=True, default='')
     in_amount = models.DecimalField(decimal_places = 2, max_digits = 11, default = 0)
     out_amount = models.DecimalField(decimal_places = 2, max_digits = 11, default = 0)
     cleared = models.BooleanField(default = False)
     reconciled = models.BooleanField(default = False)
+    system = models.BooleanField(default = False)
+    transfer_pair = models.OneToOneField('Transaction', on_delete=models.CASCADE, null = True)
 
     def __str__(self):
         return "{} {} {}".format(self.ta_account, self.ta_payee, self.ta_bucket)

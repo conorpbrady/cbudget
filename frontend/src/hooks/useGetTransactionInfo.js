@@ -13,23 +13,28 @@ export const useGetTransactionInfo = (fetchToggle) => {
         setTransactions(response.data);
         axiosInstance.get('/api/account').then((response) => {
           setAccounts(response.data);
-          axiosInstance.get('/api/category').then((response) => {
-            const parents = response.data;
-            let categories = [];
-            parents.map((subcategories) => {
-              categories = [...categories, ...subcategories.bucket];
-            });
-            setCategories(categories);
+          axiosInstance
+            .get('/api/category?transaction=true')
+            .then((response) => {
+              const parents = response.data;
+              let categories = [];
+              parents.map((subcategories) => {
+                categories = [...categories, ...subcategories.bucket];
+              });
+              setCategories(categories);
 
-            axiosInstance.get('/api/payee').then((response) => {
-              setPayees(response.data);
+              axiosInstance.get('/api/payee').then((response) => {
+                setPayees(response.data);
+              });
             });
-          });
         });
       });
     }
     handleFetch();
   }, [fetchToggle]);
 
-  return { transactions, accounts, categories, payees };
+  const updatePayees = (newPayee) => {
+    setPayees((prevState) => [...prevState, newPayee]);
+  };
+  return { transactions, accounts, categories, payees, updatePayees };
 };

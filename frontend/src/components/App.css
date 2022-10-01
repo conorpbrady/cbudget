@@ -53,11 +53,17 @@ main {
 #auth-navbar-tabs {
   border-width: 0px;
 }
+<<<<<<< HEAD
 
 #navbar-primary {
   padding: 0 1em;
 }
 
+=======
+#navbar-primary {
+  padding: 0 1em;
+}
+>>>>>>> system-categories
 .active a {
   background-color: green !important;
 }
