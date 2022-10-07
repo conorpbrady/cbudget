@@ -101,6 +101,16 @@ class AccountDetail(generics.GenericAPIView, mixins.DestroyModelMixin):
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
+class MonthList(generics.ListAPIView):
+    serializer_class = MonthSerializer
+    def get_queryset(self):
+        root_month = self.request.query_params['center']
+        min_delta = 12
+        max_delta = 12
+        root_month_id = Month.objects.get(short_name = root_month).id
+        return Month.objects.filter(id__lte = (root_month_id + max_delta), id__gte = (root_month_id - min_delta))
+
+
 class MonthlyBudgetList(generics.ListCreateAPIView):
     serializer_class = MonthlyBudgetSerializer
     def get_queryset(self):

@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import './Budget.css';
-import { splitMonthCatId } from '../utils/utils';
+import { getMonthsInWindow } from '../utils/budgetUtils';
+import { splitMonthCatId, getCurrentMonth } from '../utils/utils';
 import { submitBudgetEntry, changeBudgetEntry } from '../api/budgetApi';
 import {
   useGetMonths,
@@ -11,10 +12,13 @@ import {
 import { Table, Button, Alert } from 'react-bootstrap';
 
 export default function Budget() {
+  const currentMonth = getCurrentMonth();
+  const monthRange = 3;
+  
   const { categories } = useGetCategories();
-  const { months } = useGetMonths();
-  const { budget, setBudget } = useGetBudget(months);
-
+  const { windowMonths } = useGetMonths(currentMonth, false);
+  
+  const { budget, setBudget } = useGetBudget(windowMonths);
   const [fetchSumToggle, setFetchSumToggle] = useState(true);
 
   //const { budgetSum } = useGetBudgetSum(months, fetchSumToggle);
@@ -97,7 +101,7 @@ export default function Budget() {
         <thead>
           <tr>
             <th>Categories</th>
-            {months.map((month, index) => {
+            {windowMonths.map((month, index) => {
               return (
                 <th key={index} colSpan="3">
                   {month.key}
@@ -106,17 +110,17 @@ export default function Budget() {
             })}
           </tr>
           <MonthlySummaryLine
-            months={months}
+            months={windowMonths}
             message="Income: "
             values={reduceSumData(sumData.months, 'income')}
           />
           <MonthlySummaryLine
-            months={months}
+            months={windowMonths}
             message="Budgeted: "
             values={reduceSumData(sumData.months, 'budgetAmount')}
           />
           <MonthlySummaryLine
-            months={months}
+            months={windowMonths}
             message="Difference: "
             values={reduceSumData(sumData.months, 'leftToBudget')}
             firstCell="Categories"
@@ -132,13 +136,13 @@ export default function Budget() {
                 <tr className="heading-row">
                   <td className="budget-cat cat-heading">{category.name}</td>
                   <HeadingLines
-                    months={months}
+                    months={windowMonths}
                     categorySumData={categorySumData}
                   />
                 </tr>
 
                 <BudgetLines
-                  months={months}
+                  months={windowMonths}
                   budget={budget}
                   subcategories={category.bucket}
                   categorySumData={categorySumData}

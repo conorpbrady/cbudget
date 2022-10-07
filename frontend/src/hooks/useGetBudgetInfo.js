@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
+  transformMonthData,
+  getMonthsInWindow,
   transformBudgetData,
   transformSumData,
-  transformTransactionSumData,
 } from '../utils/budgetUtils';
 import axiosInstance from '../api/axiosApi';
 
@@ -20,14 +21,25 @@ export const useGetCategories = () => {
   return { categories };
 };
 
-export const useGetMonths = () => {
-  const [months, setMonths] = useState([
-    { id: 1, key: '0822' },
-    { id: 2, key: '0922' },
-    { id: 3, key: '1022' },
-  ]);
-  useEffect(() => {}, []);
-  return { months };
+export const useGetMonths = (currentMonth, range, toggle) => {
+  const [windowMonths, setWindowMonths] = useState([]);
+  let months = {};
+  useEffect(() => {
+    async function handleFetch() {
+      await axiosInstance
+        .get(`/api/months?center=${currentMonth}`)
+        .then((response) => {
+          months = transformMonthData(response.data);
+          setWindowMonths(getMonthsInWindow(months, currentMonth, range));
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+    handleFetch();
+  }, []);
+
+  return { windowMonths };
 };
 export const useGetBudget = (months) => {
   // Memoize this value so useEffect is not called every rerender
@@ -41,16 +53,12 @@ export const useGetBudget = (months) => {
 
   useEffect(() => {
     async function handleFetch() {
-      //await axiosInstance.get('/api/month')
-      //.then(response => {
-      //  const monthString = response.data.map(obj => obj.id).join(',');
-      //  const monthUrl = `/api/monthlybudget?months=${monthUrl}`;
       await axiosInstance.get(monthUrl).then((response) => {
         setBudget(transformBudgetData(response.data));
       });
     }
     handleFetch();
-  }, [monthString]);
+  }, []);
 
   return { budget, setBudget };
 };

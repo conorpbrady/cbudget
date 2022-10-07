@@ -13,6 +13,8 @@ urlpatterns = [
         path(prefix + 'monthlybudget', views.MonthlyBudgetList.as_view()),
         path(prefix + 'monthlybudget/entry/<int:id>', views.MonthlyBudgetUpdate.as_view()),
         path(prefix + 'monthlysum', views.MonthlySumList.as_view()),
+        path(prefix + 'months', views.MonthList.as_view()),
+
         path(prefix + 'transactionsum', views.TransactionSumList.as_view()),
         path(prefix + 'sums', views.CumSumList.as_view({ 'get': 'list' })),
         path(prefix + 'payee', views.PayeeList.as_view()),
