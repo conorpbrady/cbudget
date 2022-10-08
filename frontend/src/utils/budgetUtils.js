@@ -1,23 +1,41 @@
+export const getMonthId = (months, monthShortName) => {
+  return new Promise((resolve, reject) => {
+    if (months === undefined || months.length < 1) {
+      return reject('Month data has not been populated');
+    }
+    Object.keys(months).map((monthId) => {
+      if (months[monthId].short_name === monthShortName) {
+        return resolve(months[monthId].id);
+      }
+    });
+    return reject('Month not found in month data');
+  });
+};
+
+// Creates a string of comma-separated consecutive integers
+// given a starting value and length
+// e.g. (5, 3) => "5,6,7"
+export const createMonthString = (start, length) => {
+  return Array(length).fill(start).map((v, i) => v + i).join(',')
+}
+
 export const getMonthsInWindow = (months, currentMonth, range) => {
-  console.log(months, currentMonth, range);
   let output = [];
   let currentMonthId = -1;
 
   Object.keys(months).map((monthId) => {
     if (months[monthId].short_name === currentMonth) {
-      currentMonthId = months[monthId];
+      currentMonthId = parseInt(months[monthId].id);
     }
     if (
       currentMonthId > 0 &&
-      months[monthId] >= currentMonthId &&
-      months[monthId].id <= currentMonthId + range
+      months[monthId].id >= currentMonthId &&
+      months[monthId].id < parseInt(currentMonthId + range)
     ) {
       output.push(months[monthId]);
     }
   });
-  console.log(output);
-  return output;
-
+  return { output, currentMonthId };
 };
 
 export const transformMonthData = (data) => {

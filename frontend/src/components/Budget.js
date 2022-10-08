@@ -1,34 +1,37 @@
 import React, { useState, useCallback } from 'react';
 import './Budget.css';
-import { getMonthsInWindow } from '../utils/budgetUtils';
+import { getMonthId, getMonthsInWindow } from '../utils/budgetUtils';
 import { splitMonthCatId, getCurrentMonth } from '../utils/utils';
 import { submitBudgetEntry, changeBudgetEntry } from '../api/budgetApi';
 import {
-  useGetMonths,
+  useGetAllMonths,
   useGetCategories,
-  useGetBudget,
-  useGetSumData,
+  //useGetBudget,
+  //useGetSumData,
+  //useGetMonthId,
+  useGetBudgetData,
 } from '../hooks/useGetBudgetInfo';
 import { Table, Button, Alert } from 'react-bootstrap';
 
 export default function Budget() {
+  const { categories } = useGetCategories();
+
   const currentMonth = getCurrentMonth();
   const monthRange = 3;
-  
-  const { categories } = useGetCategories();
-  const { windowMonths } = useGetMonths(currentMonth, false);
-  
-  const { budget, setBudget } = useGetBudget(windowMonths);
-  const [fetchSumToggle, setFetchSumToggle] = useState(true);
 
-  //const { budgetSum } = useGetBudgetSum(months, fetchSumToggle);
-  const { sumData } = useGetSumData(fetchSumToggle);
+  const { monthId, budgetData, sumData, setMonthId, setBudgetData, windowMonths, loadingFinished, fetchToggle, setFetchToggle } =
+    useGetBudgetData(currentMonth, monthRange);
+
+  const handleMonthChange = (event, step) => {
+    setMonthId(monthId + step);
+  };
 
   const handleChange = (event) => {
     const month = event.target.dataset.month;
     const category = event.target.dataset.category;
-    if (budget[category] === undefined) {
-      setBudget((prevState) => ({
+
+    if (budgetData[category] === undefined) {
+      setBudgetData((prevState) => ({
         ...prevState,
         [category]: {
           [month]: {},
@@ -36,7 +39,7 @@ export default function Budget() {
       }));
     }
 
-    setBudget((prevState) => ({
+    setBudgetData((prevState) => ({
       ...prevState,
       [category]: {
         ...prevState[category],
@@ -54,7 +57,7 @@ export default function Budget() {
     const category = event.target.dataset.category;
     const parentId = event.target.dataset.parentid;
 
-    const existingAmount = budget?.[category]?.[month]?.initAmount || 0;
+    const existingAmount = budgetData?.[category]?.[month]?.initAmount || 0;
 
     if (amount === existingAmount) {
       return;
@@ -67,7 +70,7 @@ export default function Budget() {
     };
     const entryId = event.target.dataset.entry;
     submitBudgetEntry(newBudgetEntry, entryId).then((createdEntry) => {
-      setBudget((prevState) => ({
+      setBudgetData((prevState) => ({
         ...prevState,
         [createdEntry.category]: {
           ...prevState[category],
@@ -80,7 +83,7 @@ export default function Budget() {
         },
       }));
     });
-    setFetchSumToggle((prevState) => !prevState);
+    setFetchToggle((prevState) => !prevState);
   };
 
   const reduceSumData = (sumObj, keyToFilter) => {
@@ -97,14 +100,23 @@ export default function Budget() {
 
   return (
     <div className="budget-container">
-      <Table size="sm" className="budget-table">
+      <div className="month-changer">
+        <button onClick={(event) => handleMonthChange(event, -1)}>
+          &lt;&lt;
+        </button>
+        <button onClick={(event) => handleMonthChange(event, 1)}>
+          &gt;&gt;
+        </button>
+      </div>
+      { loadingFinished ? (
+        <Table size="sm" className="budget-table">
         <thead>
           <tr>
             <th>Categories</th>
             {windowMonths.map((month, index) => {
               return (
                 <th key={index} colSpan="3">
-                  {month.key}
+                  {month.long_name}
                 </th>
               );
             })}
@@ -143,7 +155,7 @@ export default function Budget() {
 
                 <BudgetLines
                   months={windowMonths}
-                  budget={budget}
+                  budget={budgetData}
                   subcategories={category.bucket}
                   categorySumData={categorySumData}
                   parentId={category.id}
@@ -154,7 +166,7 @@ export default function Budget() {
             );
           })}
         </tbody>
-      </Table>
+      </Table>) : <span>Loading...</span> }
     </div>
   );
 }
@@ -163,10 +175,10 @@ function MonthlySummaryLine(props) {
   return (
     <tr>
       <td className="budget-cat">{props.firstCell}</td>
-      {props.months.map((month) => {
-        const value = parseInt(props.values?.[month.id]) || 0;
+      {props.months?.map((month) => {
+        const value = parseInt(props.values?.[month?.id]) || 0;
         return (
-          <React.Fragment key={month.id}>
+          <React.Fragment key={month?.id}>
             <td className="monthly-summary" colSpan="2">
               {props.message}
             </td>
@@ -180,7 +192,7 @@ function MonthlySummaryLine(props) {
 
 function HeadingLines(props) {
   const months = props.months || [];
-  const headingLines = months.map((month, index) => {
+  const headingLines = months?.map((month, index) => {
     const entrySum = props.categorySumData.months?.[month.id]?.budgetTotal || 0;
     const transactionSum =
       props.categorySumData.months?.[month.id]?.transactionTotal || 0;
@@ -204,7 +216,7 @@ function BudgetLines(props) {
       <tr key={subcategory.id.toString()}>
         <td className="budget-cat"> {subcategory.name}</td>
         <MonthLines
-          budget={props.budget[subcategory.id]}
+          budget={props.budget?.[subcategory.id]}
           months={months}
           parentId={props.parentId}
           subcategoryId={subcategory.id}

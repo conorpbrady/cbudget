@@ -8,8 +8,9 @@ export default function AuthNavBar() {
       <ul className={'nav nav-tabs'} id={'auth-navbar-tabs'}>
         <li className={'nav-item'}>
           <NavLink
-            className={'nav-link'}
-            activeClassName={'active'}
+            className={({ isActive }) =>
+              isActive ? 'nav-link active-style' : 'nav-link'
+            }
             to={'/accounts'}
           >
             Accounts
@@ -17,8 +18,9 @@ export default function AuthNavBar() {
         </li>
         <li className={'nav-item'}>
           <NavLink
-            className={'nav-link'}
-            activeClassName={'active'}
+            className={({ isActive }) =>
+              isActive ? 'nav-link active-style' : 'nav-link'
+            }
             to={'/categories'}
           >
             Categories
@@ -26,8 +28,9 @@ export default function AuthNavBar() {
         </li>
         <li className={'nav-item'}>
           <NavLink
-            className={'nav-link'}
-            activeClassName={'active'}
+            className={({ isActive }) =>
+              isActive ? 'nav-link active-style' : 'nav-link'
+            }
             to={'/transactions'}
           >
             Transactions
@@ -35,8 +38,9 @@ export default function AuthNavBar() {
         </li>
         <li className={'nav-item'}>
           <NavLink
-            className={'nav-link'}
-            activeClassName={'active'}
+            className={({ isActive }) =>
+              isActive ? 'nav-link active-style' : 'nav-link'
+            }
             to={'/budget'}
           >
             Budget

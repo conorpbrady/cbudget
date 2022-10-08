@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   transformMonthData,
-  getMonthsInWindow,
+  getMonthId,
   transformBudgetData,
   transformSumData,
+  createMonthString,
 } from '../utils/budgetUtils';
 import axiosInstance from '../api/axiosApi';
 
@@ -21,35 +22,121 @@ export const useGetCategories = () => {
   return { categories };
 };
 
-export const useGetMonths = (currentMonth, range, toggle) => {
+export const useGetBudgetData = (monthShortName, range) => {
+  const [budgetData, setBudgetData] = useState([]);
+  const [sumData, setSumData] = useState([]);
+  const [monthId, setMonthId] = useState(0);
+  const [allMonths, setAllMonths] = useState([]);
+  const [monthDataLoaded, setMonthDataLoaded] = useState(false);
   const [windowMonths, setWindowMonths] = useState([]);
-  let months = {};
+  const [loadingFinished, setLoadingFinished] = useState(false);
+  const [fetchToggle, setFetchToggle] = useState(false);
+
+  const getMonthObjects = (months, monthId, range) => {
+    let output = [];
+    for (let i = 0; i < range; i++) {
+      output.push(months[monthId + i - 1]);
+    }
+    return output;
+  };
+
+  const monthString = useMemo(
+    () => createMonthString(monthId, range),
+    [monthId]
+  );
+
+  const monthUrl = `/api/monthlybudget?months=${monthString}`;
+
   useEffect(() => {
-    async function handleFetch() {
+    const handleMonthFetch = async (monthShortName) => {
       await axiosInstance
-        .get(`/api/months?center=${currentMonth}`)
+        .get(`/api/months?center=${monthShortName}`)
         .then((response) => {
-          months = transformMonthData(response.data);
-          setWindowMonths(getMonthsInWindow(months, currentMonth, range));
+          const months = response.data;
+          setAllMonths(months);
+          getMonthId(months, monthShortName)
+            .then((monthId) => {
+              setMonthId(monthId);
+              setWindowMonths(getMonthObjects(months, monthId, range));
+            })
+            .catch((error) => console.log(error));
+          setMonthDataLoaded(true);
         })
         .catch((error) => {
           console.log(error);
         });
-    }
-    handleFetch();
+    };
+    handleMonthFetch(monthShortName);
   }, []);
 
-  return { windowMonths };
+  useEffect(() => {
+    const handleBudgetFetch = async () => {
+      await axiosInstance
+        .get(monthUrl)
+        .then((response) => {
+          setBudgetData(transformBudgetData(response.data));
+        })
+        .catch((error) => console.log(error));
+    };
+
+    const handleSumFetch = async (maxMonth) => {
+      await axiosInstance
+        .get('/api/sums')
+        .then((response) => {
+          setSumData(transformSumData(response.data));
+        })
+        .catch((error) => console.log(error));
+    };
+
+    if (monthDataLoaded) {
+      handleBudgetFetch();
+      handleSumFetch(10);
+      setLoadingFinished(true);
+    }
+  }, [monthDataLoaded, monthString, fetchToggle]);
+
+  useEffect(() => {
+    setWindowMonths(getMonthObjects(allMonths, monthId, range));
+  }, [monthId]);
+
+  return {
+    monthId,
+    budgetData,
+    sumData,
+    setMonthId,
+    setBudgetData,
+    windowMonths,
+    loadingFinished,
+    fetchToggle,
+    setFetchToggle,
+  };
 };
-export const useGetBudget = (months) => {
+/*
+export const useGetMonthId = (months, monthShortName) => {
+  const [rootMonthId, setRootMonthId] = useState(0);
+  useEffect(() => {
+    getMonthId(months, monthShortName).then((monthId) =>
+      setRootMonthId(monthId)
+    );
+  }, [months, monthShortName]);
+  return { rootMonthId, setRootMonthId };
+};
+
+export const useGetBudget = (rootMonth, range) => {
+  const [budget, setBudget] = useState([]);
+
   // Memoize this value so useEffect is not called every rerender
+  // Creates a string from a starting value and adds n consecutive
+  // values e.g. (3, 3) returns "3,4,5"
   const monthString = useMemo(
-    () => months.map((obj) => obj.id).join(','),
-    [months]
+    () =>
+      Array(range)
+        .fill(rootMonth)
+        .map((v, i) => v + i)
+        .join(','),
+    [rootMonth]
   );
   const monthUrl = `/api/monthlybudget?months=${monthString}`;
-
-  const [budget, setBudget] = useState([]);
 
   useEffect(() => {
     async function handleFetch() {
@@ -58,7 +145,7 @@ export const useGetBudget = (months) => {
       });
     }
     handleFetch();
-  }, []);
+  }, [monthString]);
 
   return { budget, setBudget };
 };
@@ -73,3 +160,4 @@ export const useGetSumData = (fetchToggle) => {
   }, [fetchToggle]);
   return { sumData };
 };
+*/
