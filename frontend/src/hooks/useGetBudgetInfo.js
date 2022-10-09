@@ -31,11 +31,15 @@ export const useGetBudgetData = (monthShortName, range) => {
   const [windowMonths, setWindowMonths] = useState([]);
   const [loadingFinished, setLoadingFinished] = useState(false);
   const [fetchToggle, setFetchToggle] = useState(false);
+  const [maxFetchedMonth, setMaxFetchedMonth] = useState(0);
 
   const getMonthObjects = (months, monthId, range) => {
     let output = [];
     for (let i = 0; i < range; i++) {
-      output.push(months[monthId + i - 1]);
+      const monthObject = months[monthId + i - 1];
+      if (monthObject !== undefined) {
+        output.push(monthObject);
+      }
     }
     return output;
   };
@@ -54,6 +58,7 @@ export const useGetBudgetData = (monthShortName, range) => {
         .then((response) => {
           const months = response.data;
           setAllMonths(months);
+          setMaxFetchedMonth(Math.max(...Object.keys(months)));
           getMonthId(months, monthShortName)
             .then((monthId) => {
               setMonthId(monthId);
@@ -96,7 +101,11 @@ export const useGetBudgetData = (monthShortName, range) => {
   }, [monthDataLoaded, monthString, fetchToggle]);
 
   useEffect(() => {
-    setWindowMonths(getMonthObjects(allMonths, monthId, range));
+    const wMonths = getMonthObjects(allMonths, monthId, range);
+    if (wMonths.length < range) {
+      return;
+    }
+    setWindowMonths(wMonths);
   }, [monthId]);
 
   return {
@@ -106,6 +115,7 @@ export const useGetBudgetData = (monthShortName, range) => {
     setMonthId,
     setBudgetData,
     windowMonths,
+    maxFetchedMonth,
     loadingFinished,
     fetchToggle,
     setFetchToggle,

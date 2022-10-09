@@ -19,11 +19,25 @@ export default function Budget() {
   const currentMonth = getCurrentMonth();
   const monthRange = 3;
 
-  const { monthId, budgetData, sumData, setMonthId, setBudgetData, windowMonths, loadingFinished, fetchToggle, setFetchToggle } =
-    useGetBudgetData(currentMonth, monthRange);
+  const {
+    monthId,
+    budgetData,
+    sumData,
+    setMonthId,
+    setBudgetData,
+    windowMonths,
+    maxFetchedMonth,
+    loadingFinished,
+    fetchToggle,
+    setFetchToggle,
+  } = useGetBudgetData(currentMonth, monthRange);
 
   const handleMonthChange = (event, step) => {
-    setMonthId(monthId + step);
+    const newMonth = monthId + step;
+    if (newMonth < 1 || newMonth > (maxFetchedMonth - 1)) {
+      return;
+    }
+    setMonthId(newMonth);
   };
 
   const handleChange = (event) => {
@@ -108,65 +122,68 @@ export default function Budget() {
           &gt;&gt;
         </button>
       </div>
-      { loadingFinished ? (
+      {loadingFinished ? (
         <Table size="sm" className="budget-table">
-        <thead>
-          <tr>
-            <th>Categories</th>
-            {windowMonths.map((month, index) => {
+          <thead>
+            <tr>
+              <th>Categories</th>
+              {windowMonths.map((month, index) => {
+                return (
+                  <th key={index} colSpan="3">
+                    {month.long_name}
+                  </th>
+                );
+              })}
+            </tr>
+            <MonthlySummaryLine
+              months={windowMonths}
+              message="Income: "
+              values={reduceSumData(sumData.months, 'income')}
+            />
+            <MonthlySummaryLine
+              months={windowMonths}
+              message="Budgeted: "
+              values={reduceSumData(sumData.months, 'budgetAmount')}
+            />
+            <MonthlySummaryLine
+              months={windowMonths}
+              message="Difference: "
+              values={reduceSumData(sumData.months, 'leftToBudget')}
+              firstCell="Categories"
+            />
+            <tr></tr>
+          </thead>
+
+          <tbody>
+            {categories.map((category) => {
+              const categorySumData = sumData[category.id] || {};
               return (
-                <th key={index} colSpan="3">
-                  {month.long_name}
-                </th>
+                <React.Fragment key={category.id.toString()}>
+                  <tr className="heading-row">
+                    <td className="budget-cat cat-heading">{category.name}</td>
+                    <HeadingLines
+                      months={windowMonths}
+                      categorySumData={categorySumData}
+                    />
+                  </tr>
+
+                  <BudgetLines
+                    months={windowMonths}
+                    budget={budgetData}
+                    subcategories={category.bucket}
+                    categorySumData={categorySumData}
+                    parentId={category.id}
+                    handleChange={handleChange}
+                    handleBlur={handleBlur}
+                  />
+                </React.Fragment>
               );
             })}
-          </tr>
-          <MonthlySummaryLine
-            months={windowMonths}
-            message="Income: "
-            values={reduceSumData(sumData.months, 'income')}
-          />
-          <MonthlySummaryLine
-            months={windowMonths}
-            message="Budgeted: "
-            values={reduceSumData(sumData.months, 'budgetAmount')}
-          />
-          <MonthlySummaryLine
-            months={windowMonths}
-            message="Difference: "
-            values={reduceSumData(sumData.months, 'leftToBudget')}
-            firstCell="Categories"
-          />
-          <tr></tr>
-        </thead>
-
-        <tbody>
-          {categories.map((category) => {
-            const categorySumData = sumData[category.id] || {};
-            return (
-              <React.Fragment key={category.id.toString()}>
-                <tr className="heading-row">
-                  <td className="budget-cat cat-heading">{category.name}</td>
-                  <HeadingLines
-                    months={windowMonths}
-                    categorySumData={categorySumData}
-                  />
-                </tr>
-
-                <BudgetLines
-                  months={windowMonths}
-                  budget={budgetData}
-                  subcategories={category.bucket}
-                  categorySumData={categorySumData}
-                  parentId={category.id}
-                  handleChange={handleChange}
-                  handleBlur={handleBlur}
-                />
-              </React.Fragment>
-            );
-          })}
-        </tbody>
-      </Table>) : <span>Loading...</span> }
+          </tbody>
+        </Table>
+      ) : (
+        <span>Loading...</span>
+      )}
     </div>
   );
 }
