@@ -1,6 +1,14 @@
 .budget-container {
   display: flex;
-  width: 80%;
+  flex-direction: column;
+  width: 95%;
+  margin: auto;
+  font-size: small;
+}
+
+.month-changer {
+  display: flex;
+  justify-content: space-between;
 }
 
 .month-container {

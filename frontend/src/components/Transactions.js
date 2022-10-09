@@ -14,6 +14,8 @@ import {
   submitDeleteTransaction,
 } from '../api/transactionApi';
 
+import './Transactions.css';
+
 export default function Transaction() {
   const initTransaction = {
     ta_date: '',
@@ -152,35 +154,37 @@ export default function Transaction() {
           {resultMessage}
         </Alert>
       )}
-      <form onSubmit={(e) => handleSubmit(e, transactionToEdit != 0)}>
-        <Table striped>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Account</th>
-              <th>Payee</th>
-              <th>Category</th>
-              <th>Note</th>
-              <th>In</th>
-              <th>Out</th>
-              <th>Cleared</th>
-              <th>Reconciled</th>
-            </tr>
-          </thead>
-          <tbody>
-            <TransactionList
-              {...{
-                transactions,
-                transactionToEdit,
-                newTransactionForm,
-                editTransactionForm,
-                handleMakeTransactionEditable,
-              }}
-            />
-          </tbody>
-        </Table>
-        <ConfirmationModal {...modalChildren} />
-      </form>
+      <div className="transaction-container">
+        <form onSubmit={(e) => handleSubmit(e, transactionToEdit != 0)}>
+          <Table striped>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Account</th>
+                <th>Payee</th>
+                <th>Category</th>
+                <th>Note</th>
+                <th>In</th>
+                <th>Out</th>
+                <th>Cleared</th>
+                <th>Reconciled</th>
+              </tr>
+            </thead>
+            <tbody>
+              <TransactionList
+                {...{
+                  transactions,
+                  transactionToEdit,
+                  newTransactionForm,
+                  editTransactionForm,
+                  handleMakeTransactionEditable,
+                }}
+              />
+            </tbody>
+          </Table>
+          <ConfirmationModal {...modalChildren} />
+        </form>
+      </div>
     </>
   );
 }

@@ -123,6 +123,7 @@ export default function Budget() {
         </button>
       </div>
       {loadingFinished ? (
+        <div className="table-container">
         <Table size="sm" className="budget-table">
           <thead>
             <tr>
@@ -181,6 +182,7 @@ export default function Budget() {
             })}
           </tbody>
         </Table>
+        </div>
       ) : (
         <span>Loading...</span>
       )}
