@@ -28,6 +28,7 @@ class Bucket(BaseModel):
     parent = models.ForeignKey(Group, related_name='bucket', on_delete=models.RESTRICT, null=True)
     on_budget = models.BooleanField(default = True)
     on_transaction = models.BooleanField(default = True)
+    transfer = models.BooleanField(default = False)
     def __str__(self):
         return self.name
 

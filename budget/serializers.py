@@ -36,7 +36,7 @@ class BucketSerializer(serializers.ModelSerializer):
      #parent = serializers.StringRelatedField()
     class Meta:
         model = Bucket
-        fields = ('id', 'parent', 'name')
+        fields = ('id', 'parent', 'name', 'transfer')
 
 class MonthSerializer(serializers.ModelSerializer):
     class Meta:

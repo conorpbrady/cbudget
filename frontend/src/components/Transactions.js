@@ -15,7 +15,19 @@ import {
 } from '../api/transactionApi';
 
 import './Transactions.css';
-
+/*
+ * Handling Transfers
+ *
+ * Have two groups in Payess
+ * External and Transfers
+ *
+ * Transfers should pull from accounts
+ * Exclude currently selected account
+ * Auto create a second transaction mirroring the first
+ *
+ * On editing transfer transaction the paired transaction will update
+ *
+ */
 export default function Transaction() {
   const initTransaction = {
     ta_date: '',
@@ -30,6 +42,7 @@ export default function Transaction() {
     out_amount: 0,
     cleared: false,
     reconciled: false,
+    isTransfer: false,
   };
 
   const [transactionToEdit, setTransactionToEdit] = useState(0);
@@ -37,8 +50,14 @@ export default function Transaction() {
   const [newTransaction, setNewTransaction] = useState(initTransaction);
   const [editedTransaction, setEditedTransaction] = useState(initTransaction);
   const [fetchToggle, setFetchToggle] = useState(false);
-  const { transactions, accounts, categories, payees, updatePayees } =
-    useGetTransactionInfo(fetchToggle);
+  const {
+    transactions,
+    accounts,
+    categories,
+    payees,
+    transferCat,
+    updatePayees,
+  } = useGetTransactionInfo(fetchToggle);
   const {
     resultMessage,
     resultType,
@@ -67,6 +86,19 @@ export default function Transaction() {
   });
 
   const handleSelectChange = (selectedOption, action) => {
+    if (action.name === 'payee' && selectedOption.group === 'account') {
+      setNewTransaction((prevState) => ({
+        ...prevState,
+        isTransfer: true,
+      }));
+    }
+    if (action.name === 'payee' && selectedOption.group === 'payee') {
+      setNewTransaction((prevState) => ({
+        ...prevState,
+        isTransfer: false,
+        category_id: null,
+      }));
+    }
     setNewTransaction((prevState) => ({
       ...prevState,
       [`${action.name}_id`]: `${selectedOption.value}`,
@@ -130,6 +162,7 @@ export default function Transaction() {
       handleSelectChange={handleSelectChange}
       handleCancel={handleCancel}
       transactionBeingEdited={transactionToEdit != 0}
+      transferCat={transferCat}
     />
   );
 

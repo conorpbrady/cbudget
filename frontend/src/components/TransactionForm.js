@@ -11,11 +11,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function TransactionForm(props) {
-  const mapToOptions = (arr) => {
+  const mapToOptions = (arr, groupName) => {
     return arr.map((obj) => {
       return {
         label: obj.name || obj.accountName,
         value: obj.id,
+        group: groupName,
       };
     });
   };
@@ -31,20 +32,39 @@ export default function TransactionForm(props) {
       });
     }
   };
-  const accOptions = mapToOptions(props.accounts);
-  const catOptions = mapToOptions(props.categories);
-  const payOptions = mapToOptions(props.payees);
 
+  let fullCategories = [...props.categories];
+  if (props.details.isTransfer) {
+    fullCategories = [...fullCategories, ...props.transferCat];
+  }
+  const accOptions = mapToOptions(props.accounts, 'account');
+  const catOptions = mapToOptions(fullCategories, 'category');
+  const payOptions = mapToOptions(props.payees, 'payee');
+
+  const payAccOptions = [
+    {
+      label: 'Payees',
+      options: payOptions,
+    },
+    {
+      label: 'Transfers',
+      options: accOptions,
+    },
+  ];
   const accSelectedOption = getSelectedOption(
     accOptions,
     props.details.account_id
   );
+  if (props.details.isTransfer) {
+    console.log(props.transferCat[0]);
+    props.details.category_id = props.transferCat[0].id;
+  }
   const catSelectedOption = getSelectedOption(
     catOptions,
     props.details.category_id
   );
   const paySelectedOption = getSelectedOption(
-    payOptions,
+    payAccOptions,
     props.details.payee_id
   );
 
@@ -71,7 +91,7 @@ export default function TransactionForm(props) {
       <td>
         <Creatable
           name="payee"
-          options={payOptions}
+          options={payAccOptions}
           value={paySelectedOption}
           onChange={props.handleSelectChange}
           onCreateOption={props.handleCreate}
@@ -84,7 +104,11 @@ export default function TransactionForm(props) {
           options={catOptions}
           value={catSelectedOption}
           onChange={props.handleSelectChange}
-          isDisabled={props.transactionBeingEdited || props.details.system}
+          isDisabled={
+            props.transactionBeingEdited ||
+            props.details.system ||
+            props.details.isTransfer
+          }
         />
       </td>
       <td>

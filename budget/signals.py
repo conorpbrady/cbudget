@@ -15,6 +15,8 @@ def create_system_categories(sender, instance, created, **kwargs):
 
         income_bucket = Bucket(name='Income', owner=instance, parent=income_group, on_budget=False, on_transaction=True)
         income_bucket.save()
+        transfer_bucket = Bucket(name='Transfer', owner=instance, parent=transfer_group, on_budget=False, on_transaction=True, transfer=True)
+        transfer_bucket.save()
 
 def on_account_create(sender, instance, created, **kwargs):
     if created:
