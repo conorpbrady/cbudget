@@ -5,7 +5,7 @@ import { matchPath } from 'react-router';
 export default function AuthNavBar() {
   return (
     <nav className={'navbar nav-light'} id={'auth-navbar'}>
-      <ul className={'nav nav-tabs'} id={'auth-navbar-tabs'}>
+      <ul className={'nav'}>
         <li className={'nav-item'}>
           <NavLink
             className={({ isActive }) =>

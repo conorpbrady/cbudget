@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { submitNewAccount, submitDeleteAccount } from '../api/accountsApi';
 import { useGetAccounts } from '../hooks/useGetAccounts';
 import ConfirmationModal from './ConfirmationModal';
@@ -96,12 +97,12 @@ function AccountList(props) {
         <td>{account.accountName}</td>
         <td>{account.accountType}</td>
         <td>
-          <Button
-            variant="outline-danger"
+          <a
+            href="#"
             onClick={() => props.showDeleteModal('Account', account.id)}
           >
             x
-          </Button>
+          </a>
         </td>
       </tr>
     );

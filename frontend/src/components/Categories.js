@@ -102,12 +102,12 @@ function CategoryList(props) {
             <strong>{category.name}</strong>
           </td>
           <td>
-            <Button
-              variant="outline-danger"
+            <a
+              href="#"
               onClick={() => props.showDeleteModal('Category', category.id)}
             >
               x
-            </Button>
+            </a>
           </td>
         </tr>
         <SubCategoryList
@@ -126,12 +126,12 @@ function SubCategoryList(props) {
       <tr key={subcategory.id}>
         <td>{subcategory.name}</td>
         <td>
-          <Button
-            variant="outline-danger"
+          <a
+            href="#"
             onClick={() => props.showDeleteModal('Subcategory', subcategory.id)}
           >
             x
-          </Button>
+          </a>
         </td>
       </tr>
     );

@@ -48,22 +48,26 @@ main {
   background-color: #6C7A9E;
 }
 #auth-navbar {
-  padding-bottom: 0em;
+  padding: 0em;
 }
 #auth-navbar-tabs {
   border-width: 0px;
 }
-<<<<<<< HEAD
-
 #navbar-primary {
   padding: 0 1em;
 }
-
-=======
-#navbar-primary {
-  padding: 0 1em;
-}
->>>>>>> system-categories
 .active a {
   background-color: green !important;
+}
+
+nav ul.nav li.nav-item a.nav-link {
+  color: white;
+}
+
+a.navbar-brand {
+  color: white;
+}
+.span-link {
+  text-decoration: underline;
+  color: blue
 }

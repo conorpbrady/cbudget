@@ -134,7 +134,7 @@ export default function Transaction() {
 
   const handleSubmit = (event, isEditTransaction) => {
     event.preventDefault();
-
+    console.log(isEditTransaction);
     if (isEditTransaction) {
       submitEditTransaction(editedTransaction);
       setTransactionToEdit(0);
@@ -188,7 +188,10 @@ export default function Transaction() {
         </Alert>
       )}
       <div className="transaction-container">
-        <form onSubmit={(e) => handleSubmit(e, transactionToEdit != 0)}>
+        <form
+          id="transaction-form"
+          onSubmit={(e) => handleSubmit(e, transactionToEdit != 0)}
+        >
           <Table striped>
             <thead>
               <tr>
